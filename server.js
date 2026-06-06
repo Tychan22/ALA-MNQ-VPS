@@ -74,11 +74,12 @@ function getTradingDate() {
 const pending = {};
 
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
-async function getChartBuffer() {
+async function getChartBuffer(symbol = "XAUUSD") {
   if (!CHART_IMG_KEY) return null;
+  const layoutId = symbol.includes("BTC") ? "73EEecm3" : "elAti8iP";
   try {
     const res = await axios.post(
-      "https://api.chart-img.com/v2/tradingview/layout-chart/73EEecm3",
+      "https://api.chart-img.com/v2/tradingview/layout-chart/" + layoutId,
       { symbol: "OANDA:XAUUSD", interval: "5m" },
       { headers: { "x-api-key": CHART_IMG_KEY, "content-type": "application/json" }, responseType: "arraybuffer" }
     );
@@ -153,7 +154,7 @@ async function handleOpen(req, res) {
   ].join("\n");
 
   try {
-    const chartBuffer = await getChartBuffer();
+    const chartBuffer = await getChartBuffer(symbol);
 
     // Save open screenshot
     let imgOpen = null;
@@ -208,7 +209,7 @@ async function handleClose(req, res, code) {
 
   try {
     // Grab close screenshot
-    const chartBuffer = await getChartBuffer();
+    const chartBuffer = await getChartBuffer(symbol);
     let imgClose = null;
     if (chartBuffer) {
       imgClose = saveScreenshot(chartBuffer, `close_${symbol}`);
