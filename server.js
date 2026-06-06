@@ -16,8 +16,9 @@ const CHART_IMG_KEY      = process.env.CHART_IMG_KEY;
 const WEBHOOK_SECRET     = process.env.WEBHOOK_SECRET;
 
 // ─── FILE STORAGE ─────────────────────────────────────────────────────────────
-const TRADES_FILE  = path.join(__dirname, "trades.json");
-const SCREENS_DIR  = path.join(__dirname, "screenshots");
+const DATA_DIR     = process.env.DATA_DIR || path.join(__dirname);
+const TRADES_FILE  = path.join(DATA_DIR, "trades.json");
+const SCREENS_DIR  = path.join(DATA_DIR, "screenshots");
 
 if (!fs.existsSync(SCREENS_DIR)) fs.mkdirSync(SCREENS_DIR);
 
