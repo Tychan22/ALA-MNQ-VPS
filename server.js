@@ -292,8 +292,7 @@ async function handlePartial(req, res) {
     `🎯 <b>TP2:</b>    ${tp ?? "—"}`,
     ``,
     `⏱  <b>Time:</b>  ${time} EST`,
-  ].join("
-");
+  ].join("\n");
 
   try {
     // Update pending SL to entry (BE)
@@ -327,8 +326,7 @@ async function handleBE(req, res) {
     `💰 <b>PnL:</b>    +$300 (1R from partial)`,
     ``,
     `🕒 <b>Time:</b>   ${time} EST`,
-  ].join("
-");
+  ].join("\n");
 
   try {
     const chartBuffer = await getChartBuffer(symbol);
