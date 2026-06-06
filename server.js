@@ -156,24 +156,24 @@ async function handleOpen(req, res) {
     `⏱  <b>Time:</b>  ${time} EST`,
   ].join("\n");
 
-  // Respond immediately so TradingView doesn't timeout
-  res.json({ ok: true, action: "open", symbol });
-
-  // Store pending trade right away
-  if (pending[symbol]) {
-    console.log(`[OPEN] Updated signal for ${symbol} — replacing pending with new entry`);
-  }
-  pending[symbol] = {
-    symbol, entry, sl, tp, tp1,
-    session: session || "—",
-    date: getTradingDate(),
-    ts: Date.now(),
-    imgOpen: null,
-    risk: risk || null,
-  };
-
-  // Process screenshot and Telegram async
   try {
+    // Store pending FIRST before anything else
+    if (pending[symbol]) {
+      console.log(`[OPEN] Updated signal for ${symbol} — replacing pending with new entry`);
+    }
+    pending[symbol] = {
+      symbol, entry, sl, tp, tp1,
+      session: session || "—",
+      date: getTradingDate(),
+      ts: Date.now(),
+      imgOpen: null,
+      risk: risk || null,
+    };
+
+    // Respond to TradingView immediately
+    res.json({ ok: true, action: "open", symbol });
+
+    // Then grab screenshot and send Telegram async
     const chartBuffer = await getChartBuffer(symbol);
     let imgOpen = null;
     if (chartBuffer) {
@@ -182,7 +182,6 @@ async function handleOpen(req, res) {
     } else {
       await sendTelegram(msg);
     }
-    // Update pending with screenshot path
     if (pending[symbol]) pending[symbol].imgOpen = imgOpen;
     console.log(`[OPEN] Pending trade stored for ${symbol}, imgOpen: ${imgOpen}`);
   } catch (err) {
