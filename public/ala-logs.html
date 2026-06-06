@@ -3,26 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ALA LOGS</title>
+<title>ALA TEST LOGS</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
 
   :root {
-    --bg: #050a05;
-    --bg2: #090f09;
-    --bg3: #0d150d;
-    --border: #1a2e1a;
-    --green: #00ff41;
-    --green-dim: #00c032;
-    --green-dark: #003310;
+    --bg: #0a0700;
+    --bg2: #0f0a00;
+    --bg3: #150d00;
+    --border: #2e1a00;
+    --green: #ff8c00;
+    --green-dim: #cc6f00;
+    --green-dark: #2a1500;
     --red: #ff2244;
     --red-dark: #330010;
     --amber: #ffaa00;
     --cyan: #00ffcc;
-    --text: #8aff8a;
-    --text-dim: #3a6e3a;
-    --text-muted: #1e3e1e;
+    --text: #ffb347;
+    --text-dim: #7a4f00;
+    --text-muted: #3a2000;
     --mono: 'Share Tech Mono', monospace;
     --sans: 'Rajdhani', sans-serif;
   }
@@ -557,7 +557,7 @@
 <div class="shell">
 
   <header>
-    <div class="logo">ALA <span>//</span> LOGS</div>
+    <div class="logo">ALA <span>//</span> TEST</div>
     <div class="status">
       <div class="dot"></div>
       <span id="last-sync">SYNCING...</span>
@@ -618,7 +618,7 @@
       <div class="panel-title">Calendar <span id="cal-month">—</span></div>
       <div class="cal-grid" id="cal-labels"></div>
       <div class="cal-grid" id="cal-grid"></div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-top:1px solid #1a2e1a;margin-top:14px;padding-top:12px;text-align:center;font-size:9px;letter-spacing:2px;color:#3a6e3a;">SYSTEM UPTIME<br><span id="uptime-counter" style="color:#00ff41;font-family:Rajdhani,sans-serif;font-size:18px;font-weight:700;margin-top:4px;display:block;">—</span><span style="font-size:8px;color:#1e3e1e;letter-spacing:2px;margin-top:4px;display:block;">SINCE MAY 31 2026</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-top:1px solid #1a2e1a;margin-top:14px;padding-top:12px;text-align:center;font-size:9px;letter-spacing:2px;color:#7a4f00;">SYSTEM UPTIME<br><span id="uptime-counter" style="color:#ff8c00;font-family:Rajdhani,sans-serif;font-size:18px;font-weight:700;margin-top:4px;display:block;">—</span><span style="font-size:8px;color:#3a2000;letter-spacing:2px;margin-top:4px;display:block;">SINCE JUN 05 2026</span></div>
           </div>
 
   </div>
@@ -666,12 +666,12 @@ canvas.height = window.innerHeight;
 
 const cols = Math.floor(canvas.width / 14);
 const drops = Array(cols).fill(1);
-const chars  = 'ALAXAUUSDGOLDLONGBREAKOUTLIQSWEEP0123456789$₿';
+const chars  = 'ALABTCUSDBREAKOUTTESTLONGSWEEP0123456789$₿⚡';
 
 function drawMatrix() {
   ctx.fillStyle = 'rgba(5,10,5,0.05)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#00ff41';
+  ctx.fillStyle = '#ff8c00';
   ctx.font = '12px Share Tech Mono';
   drops.forEach((y, i) => {
     const char = chars[Math.floor(Math.random() * chars.length)];
@@ -756,8 +756,8 @@ function render() {
       labels: ['Win', 'Loss'],
       datasets: [{
         data: [wins.length || 0, losses.length || 0.001],
-        backgroundColor: ['#003310', '#330010'],
-        borderColor: ['#00ff41', '#ff2244'],
+        backgroundColor: ['#2a1500', '#330010'],
+        borderColor: ['#ff8c00', '#ff2244'],
         borderWidth: 1,
       }]
     },
@@ -782,9 +782,9 @@ function render() {
     data: {
       datasets: [{
         data: pnlData,
-        borderColor: totalPnl >= 0 ? '#00ff41' : '#ff2244',
+        borderColor: totalPnl >= 0 ? '#ff8c00' : '#ff2244',
         borderWidth: 2,
-        pointBackgroundColor: totalPnl >= 0 ? '#00ff41' : '#ff2244',
+        pointBackgroundColor: totalPnl >= 0 ? '#ff8c00' : '#ff2244',
         pointRadius: 3,
         fill: true,
         backgroundColor: totalPnl >= 0 ? 'rgba(0,255,65,0.06)' : 'rgba(255,34,68,0.06)',
@@ -796,7 +796,7 @@ function render() {
       scales: {
         x: { display: false },
         y: {
-          ticks: { color: '#3a6e3a', font: { family: 'Share Tech Mono', size: 10 },
+          ticks: { color: '#7a4f00', font: { family: 'Share Tech Mono', size: 10 },
                    callback: v => '$' + v },
           grid: { color: '#0d150d' },
           border: { color: '#1a2e1a' }
@@ -934,7 +934,7 @@ syncFromVPS();
 setInterval(syncFromVPS, 30000);
 
 // ── UPTIME COUNTER ────────────────────────────────────────────────────────────
-const START_DATE = new Date('2026-05-31T00:00:00-04:00'); // May 31 2026 EST
+const START_DATE = new Date('2026-06-05T00:00:00-04:00'); // May 31 2026 EST
 
 function updateUptime() {
   const now   = new Date();
