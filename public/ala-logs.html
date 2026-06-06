@@ -308,6 +308,8 @@
   .badge.open { background: #001a2a; color: var(--cyan); border: 1px solid var(--cyan); }
   .badge.be { background: #001a2a; color: #00ccff; border: 1px solid #00ccff; }
   .badge.ghost { background: #1a1a1a; color: #666; border: 1px solid #444; }
+  .badge.long { background: #001a2a; color: #2196F3; border: 1px solid #2196F3; }
+  .badge.short { background: #1a0010; color: #ff2244; border: 1px solid #ff2244; }
 
   .pnl-pos { color: var(--green); }
   .pnl-neg { color: var(--red); }
@@ -637,9 +639,10 @@
         <tr>
           <th>Date</th>
           <th>Session</th>
+          <th>Bias</th>
           <th>Entry</th>
-          <th>SL</th>
-          <th>TP</th>
+          <th>Stop</th>
+          <th>Target</th>
           <th>Exit</th>
           <th>R:R</th>
           <th>Result</th>
@@ -876,14 +879,17 @@ function render() {
       const pnlClass = result === 'WIN' ? 'pnl-pos' : result === 'LOSS' ? 'pnl-neg' : 'pnl-open';
       const badgeClass = t.orphan ? 'ghost' : result === 'WIN' ? 'win' : result === 'LOSS' ? 'loss' : result === 'BE' ? 'be' : 'open';
       const badgeLabel = t.orphan ? 'GHOST' : result;
+      const biasClass = t.direction === 'SHORT' ? 'short' : 'long';
+      const biasLabel = t.direction || 'LONG';
       return `<tr ondblclick="openPopupByIndex(${trades.length - 1 - ri})" style="cursor:pointer">
         <td>${t.date || '—'}</td>
         <td>${t.session || '—'}</td>
+        <td><span class="badge ${biasClass}">${biasLabel}</span></td>
         <td>${t.entry || '—'}</td>
         <td style="color:var(--red)">${t.sl || '—'}</td>
         <td style="color:var(--amber)">${t.tp || '—'}</td>
         <td>${t.exit || '—'}</td>
-        <td style="color:var(--amber)">${t.rr ? t.rr + ':1' : '—'}</td>
+        <td style="color:var(--amber)">${t.rr ? (parseFloat(t.rr) % 1 === 0 ? parseInt(t.rr) : parseFloat(t.rr).toFixed(1)) + ':1' : '—'}</td>
         <td><span class="badge ${badgeClass}">${result}</span></td>
         <td class="${pnlClass}">${pnlStr}</td>
         <td><button class="btn danger" style="padding:3px 10px;font-size:9px" onclick="deleteTrade(${i})">✕</button></td>
@@ -1006,6 +1012,14 @@ function closeLightbox() {
   document.getElementById('lightbox').classList.remove('active');
 }
 
+function formatDuration(ms) {
+  const mins = Math.floor(ms / 60000);
+  const hrs  = Math.floor(mins / 60);
+  const rem  = mins % 60;
+  if (hrs > 0) return hrs + 'h ' + rem + 'm';
+  return mins + 'm';
+}
+
 function openPopupByIndex(i) {
   let trades = getTrades();
   const allTrades = trades;
@@ -1039,8 +1053,8 @@ function openPopup(t) {
   if (!t.imgClose) { imgClose.style.display = 'none'; if (clNS) clNS.style.display = 'flex'; }
 
   document.getElementById('ps-entry').textContent = t.entry || '—';
-  document.getElementById('ps-sl').textContent    = t.sl    || '—';
-  document.getElementById('ps-tp').textContent    = t.tp    || '—';
+  document.getElementById('ps-sl').textContent    = t.sl    || '—'; // STOP
+  document.getElementById('ps-tp').textContent    = t.tp    || '—'; // TARGET
   document.getElementById('ps-exit').textContent  = t.exit  || '—';
   document.getElementById('ps-rr').textContent    = t.rr ? t.rr + ':1' : '—';
 
@@ -1081,11 +1095,12 @@ function closePopup(e) {
     </div>
     <div class="popup-stats">
       <div class="popup-stat">ENTRY <span id="ps-entry">—</span></div>
-      <div class="popup-stat">SL <span class="red" id="ps-sl">—</span></div>
-      <div class="popup-stat">TP <span class="amber" id="ps-tp">—</span></div>
+      <div class="popup-stat">STOP <span class="red" id="ps-sl">—</span></div>
+      <div class="popup-stat">TARGET <span class="amber" id="ps-tp">—</span></div>
       <div class="popup-stat">EXIT <span id="ps-exit">—</span></div>
       <div class="popup-stat">R:R <span class="amber" id="ps-rr">—</span></div>
       <div class="popup-stat">PNL <span id="ps-pnl">—</span></div>
+      <div class="popup-stat">DURATION <span id="ps-dur" style="color:var(--text-dim)">—</span></div>
     </div>
   </div>
 </div>
