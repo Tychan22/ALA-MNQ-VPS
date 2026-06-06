@@ -273,6 +273,112 @@ async function handleClose(req, res, code) {
   }
 }
 
+
+// ─── PARTIAL HANDLER (action 4 — TP1 hit, SL moved to BE) ───────────────────
+async function handlePartial(req, res) {
+  const { symbol = "XAUUSD", entry, sl, tp, tp1, timestamp } = req.body;
+  console.log("[PARTIAL]", req.body);
+
+  const tsNum  = parseInt(timestamp);
+  const tsDate = timestamp ? (tsNum > 1e12 ? new Date(tsNum) : new Date(timestamp)) : new Date();
+  const time   = tsDate.toLocaleString("en-US", { timeZone: "America/New_York", hour12: false });
+
+  const msg = [
+    `⚡ <b>ALA PARTIAL — TP1 HIT ${symbol}</b>`,
+    ``,
+    `✅ <b>1R secured</b> — SL moved to BE`,
+    `📍 <b>Entry:</b>  ${entry ?? "—"}`,
+    `🎯 <b>TP1:</b>    ${tp1 ?? "—"}`,
+    `🎯 <b>TP2:</b>    ${tp ?? "—"}`,
+    ``,
+    `⏱  <b>Time:</b>  ${time} EST`,
+  ].join("
+");
+
+  try {
+    // Update pending SL to entry (BE)
+    if (pending[symbol]) {
+      pending[symbol].sl = entry;
+      pending[symbol].tp1Hit = true;
+      console.log(`[PARTIAL] Updated pending ${symbol} SL to BE: ${entry}`);
+    }
+    await sendTelegram(msg);
+    res.json({ ok: true, action: "partial", symbol });
+  } catch (err) {
+    console.error("[PARTIAL] Error:", err.message);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+}
+
+// ─── BE HANDLER (action 5 — stopped at breakeven after partial) ──────────────
+async function handleBE(req, res) {
+  const { symbol = "XAUUSD", entry, exit, tp, sl, timestamp } = req.body;
+  console.log("[BE]", req.body);
+
+  const tsNum  = parseInt(timestamp);
+  const tsDate = timestamp ? (tsNum > 1e12 ? new Date(tsNum) : new Date(timestamp)) : new Date();
+  const time   = tsDate.toLocaleString("en-US", { timeZone: "America/New_York", hour12: false });
+
+  const msg = [
+    `⚪ <b>ALA CLOSED — BE ${symbol}</b>`,
+    ``,
+    `📍 <b>Entry:</b>  ${entry ?? "—"}`,
+    `🚪 <b>Exit:</b>   ${exit ?? entry ?? "—"}`,
+    `💰 <b>PnL:</b>    +$300 (1R from partial)`,
+    ``,
+    `🕒 <b>Time:</b>   ${time} EST`,
+  ].join("
+");
+
+  try {
+    const chartBuffer = await getChartBuffer(symbol);
+    let imgClose = null;
+    if (chartBuffer) {
+      imgClose = saveScreenshot(chartBuffer, `close_${symbol}`);
+      await sendTelegramPhoto(msg, chartBuffer);
+    } else {
+      await sendTelegram(msg);
+    }
+
+    const openTrade  = pending[symbol] || null;
+    const imgOpen    = openTrade ? openTrade.imgOpen : null;
+    if (pending[symbol]) delete pending[symbol];
+
+    const pen        = openTrade || {};
+    const tradeEntry = entry || pen.entry;
+    const tradeSL    = sl    || pen.sl;
+    const tradeTP    = tp    || pen.tp;
+    const rr         = "1:1";
+
+    const trade = {
+      symbol,
+      date:     pen.date || getTradingDate(),
+      session:  pen.session || "—",
+      entry:    tradeEntry,
+      sl:       tradeSL,
+      tp:       tradeTP,
+      exit:     exit || tradeEntry,
+      result:   "BE",
+      rr,
+      imgOpen,
+      imgClose,
+      ts:       pen.ts || Date.now(),
+      tsClose:  Date.now(),
+      orphan:   !openTrade,
+    };
+
+    const trades = readTrades();
+    trades.push(trade);
+    writeTrades(trades);
+
+    console.log(`[BE] Trade logged. imgOpen: ${imgOpen} imgClose: ${imgClose}`);
+    res.json({ ok: true, action: "be", symbol });
+  } catch (err) {
+    console.error("[BE] Error:", err.message);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+}
+
 // ─── ROUTES ───────────────────────────────────────────────────────────────────
 app.get("/", (req, res) => res.json({ status: "ALA VPS online", version: "2.0.0" }));
 
@@ -287,6 +393,8 @@ app.post("/signal", async (req, res) => {
   const code = parseInt(raw);
   console.log("[/signal] action raw:", raw, "parsed:", code, "body:", JSON.stringify(req.body));
   if (code === 2 || code === 3) return handleClose(req, res, code);
+  if (code === 4) return handlePartial(req, res);
+  if (code === 5) return handleBE(req, res);
   // Default to open for action=1, NaN, undefined, or any unrecognized value
   return handleOpen(req, res);
 });

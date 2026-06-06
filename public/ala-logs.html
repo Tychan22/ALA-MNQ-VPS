@@ -306,6 +306,7 @@
   .badge.win { background: var(--green-dark); color: var(--green); border: 1px solid var(--green-dim); }
   .badge.loss { background: var(--red-dark); color: var(--red); border: 1px solid var(--red); }
   .badge.open { background: #001a2a; color: var(--cyan); border: 1px solid var(--cyan); }
+  .badge.be { background: #001a2a; color: #00ccff; border: 1px solid #00ccff; }
 
   .pnl-pos { color: var(--green); }
   .pnl-neg { color: var(--red); }
@@ -704,6 +705,7 @@ function calcRR(entry, sl, tp) {
 function calcPnl(result, rr) {
   if (result === 'WIN')  return +(RISK * parseFloat(rr)).toFixed(0);
   if (result === 'LOSS') return -RISK;
+  if (result === 'BE')   return RISK; // 1R from partial
   return null;
 }
 
@@ -724,7 +726,7 @@ function render() {
   let trades = getTrades();
   const allTrades = trades;
   if (currentResultFilter) trades = trades.filter(t => t.result === currentResultFilter);
-  const closed = allTrades.filter(t => t.result === 'WIN' || t.result === 'LOSS');
+  const closed = allTrades.filter(t => t.result === 'WIN' || t.result === 'LOSS' || t.result === 'BE');
   const wins   = closed.filter(t => t.result === 'WIN');
   const losses = closed.filter(t => t.result === 'LOSS');
   const open   = allTrades.filter(t => t.result === 'OPEN');
@@ -761,10 +763,11 @@ function render() {
   // Donut
   document.getElementById('donut-label').textContent = closed.length ? wins.length + 'W / ' + losses.length + 'L' : '—';
   // Interactive donut
-  const donutData   = [wins.length, losses.length];
-  const donutKeys   = ['WIN', 'LOSS'];
-  const donutLabels = ['Win', 'Loss'];
-  const donutColors = ['#ff8c00', '#ff2244'];
+  const bes        = closed.filter(t => t.result === 'BE');
+  const donutData   = [wins.length, losses.length, bes.length];
+  const donutKeys   = ['WIN', 'LOSS', 'BE'];
+  const donutLabels = ['Win', 'Loss', 'BE'];
+  const donutColors = ['#ff8c00', '#ff2244', '#00ccff'];
 
   // Legend with click filter
   document.getElementById('donut-label').textContent = closed.length ? wins.length + 'W / ' + losses.length + 'L' : '—';
@@ -867,7 +870,7 @@ function render() {
         ? (t.pnl >= 0 ? '+$' + t.pnl : '-$' + Math.abs(t.pnl))
         : '—';
       const pnlClass = result === 'WIN' ? 'pnl-pos' : result === 'LOSS' ? 'pnl-neg' : 'pnl-open';
-      const badgeClass = result === 'WIN' ? 'win' : result === 'LOSS' ? 'loss' : 'open';
+      const badgeClass = result === 'WIN' ? 'win' : result === 'LOSS' ? 'loss' : result === 'BE' ? 'be' : 'open';
       return `<tr ondblclick="openPopupByIndex(${trades.length - 1 - ri})" style="cursor:pointer">
         <td>${t.date || '—'}</td>
         <td>${t.session || '—'}</td>
