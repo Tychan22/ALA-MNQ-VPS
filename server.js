@@ -80,7 +80,7 @@ async function getChartBuffer(symbol = "XAUUSD") {
   try {
     const res = await axios.post(
       "https://api.chart-img.com/v2/tradingview/layout-chart/" + layoutId,
-      { symbol: "OANDA:XAUUSD", interval: "5m" },
+      { symbol: symbol.includes("BTC") ? "COINBASE:BTCUSD" : "OANDA:XAUUSD", interval: symbol.includes("BTC") ? "3m" : "5m" },
       { headers: { "x-api-key": CHART_IMG_KEY, "content-type": "application/json" }, responseType: "arraybuffer" }
     );
     return Buffer.from(res.data);
