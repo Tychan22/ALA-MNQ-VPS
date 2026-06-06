@@ -307,6 +307,7 @@
   .badge.loss { background: var(--red-dark); color: var(--red); border: 1px solid var(--red); }
   .badge.open { background: #001a2a; color: var(--cyan); border: 1px solid var(--cyan); }
   .badge.be { background: #001a2a; color: #00ccff; border: 1px solid #00ccff; }
+  .badge.ghost { background: #1a1a1a; color: #666; border: 1px solid #444; }
 
   .pnl-pos { color: var(--green); }
   .pnl-neg { color: var(--red); }
@@ -873,7 +874,8 @@ function render() {
         ? (t.pnl >= 0 ? '+$' + t.pnl : '-$' + Math.abs(t.pnl))
         : '—';
       const pnlClass = result === 'WIN' ? 'pnl-pos' : result === 'LOSS' ? 'pnl-neg' : 'pnl-open';
-      const badgeClass = result === 'WIN' ? 'win' : result === 'LOSS' ? 'loss' : result === 'BE' ? 'be' : 'open';
+      const badgeClass = t.orphan ? 'ghost' : result === 'WIN' ? 'win' : result === 'LOSS' ? 'loss' : result === 'BE' ? 'be' : 'open';
+      const badgeLabel = t.orphan ? 'GHOST' : result;
       return `<tr ondblclick="openPopupByIndex(${trades.length - 1 - ri})" style="cursor:pointer">
         <td>${t.date || '—'}</td>
         <td>${t.session || '—'}</td>
