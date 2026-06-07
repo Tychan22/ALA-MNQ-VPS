@@ -382,6 +382,135 @@ async function handleBE(req, res) {
   }
 }
 
+
+// ─── MNQ OPEN HANDLER ────────────────────────────────────────────────────────
+async function handleMNQOpen(req, res) {
+  const { symbol = "MNQ1!", type = "LONG", entry, sl, tp, risk, timestamp } = req.body;
+  const direction = type.includes("SHORT") ? "SHORT" : "LONG";
+  const signalType = type; // LONG, SHORT, BD_LONG, BD_SHORT
+  console.log("[MNQ OPEN]", req.body);
+
+  const tsNum  = parseInt(timestamp);
+  const tsDate = timestamp ? (tsNum > 1e12 ? new Date(tsNum) : new Date(timestamp)) : new Date();
+  const time   = tsDate.toLocaleString("en-US", { timeZone: "America/New_York", hour12: false });
+
+  const rr = entry && sl && tp
+    ? (Math.abs(parseFloat(tp) - parseFloat(entry)) / Math.abs(parseFloat(entry) - parseFloat(sl))).toFixed(2)
+    : "—";
+
+  const dirEmoji = direction === "SHORT" ? "🔴" : "🟢";
+  const msg = [
+    `${dirEmoji} <b>MNQ SIGNAL — ${signalType}</b>`,
+    ``,
+    `📍 <b>Entry:</b>  ${entry ?? "—"}`,
+    `🛑 <b>SL:</b>     ${sl ?? "—"}`,
+    `🎯 <b>TP:</b>     ${tp ?? "—"}`,
+    `📐 <b>R:R:</b>    1:${rr}`,
+    ``,
+    `⏱  <b>Time:</b>  ${time} EST`,
+  ].join("\n");
+
+  try {
+    pending[symbol] = {
+      symbol, entry, sl, tp,
+      session: "NY",
+      direction,
+      date: getTradingDate(),
+      ts: Date.now(),
+      imgOpen: null,
+      risk: risk || null,
+    };
+
+    res.json({ ok: true, action: "open", symbol, direction });
+
+    const chartBuffer = await getChartBuffer(symbol);
+    let imgOpen = null;
+    if (chartBuffer) {
+      imgOpen = saveScreenshot(chartBuffer, `open_${symbol}`);
+      await sendTelegramPhoto(msg, chartBuffer);
+    } else {
+      await sendTelegram(msg);
+    }
+    if (pending[symbol]) pending[symbol].imgOpen = imgOpen;
+    console.log(`[MNQ OPEN] Pending stored for ${symbol}, direction: ${direction}, imgOpen: ${imgOpen}`);
+  } catch (err) {
+    console.error("[MNQ OPEN] Error:", err.message);
+  }
+}
+
+// ─── MNQ CLOSE HANDLER ───────────────────────────────────────────────────────
+async function handleMNQClose(req, res, isWin) {
+  const { symbol = "MNQ1!", type = "LONG", exit, timestamp } = req.body;
+  const result = isWin ? "WIN" : "LOSS";
+  const direction = type.includes("SHORT") ? "SHORT" : "LONG";
+  console.log(`[MNQ ${result}]`, req.body);
+
+  const tsNum  = parseInt(timestamp);
+  const tsDate = timestamp ? (tsNum > 1e12 ? new Date(tsNum) : new Date(timestamp)) : new Date();
+  const time   = tsDate.toLocaleString("en-US", { timeZone: "America/New_York", hour12: false });
+
+  const emoji = isWin ? "✅" : "❌";
+  const msg = [
+    `${emoji} <b>MNQ CLOSED — ${result} ${direction}</b>`,
+    ``,
+    `🚪 <b>Exit:</b>   ${exit ?? "—"}`,
+    ``,
+    `🕒 <b>Time:</b>   ${time} EST`,
+  ].join("\n");
+
+  try {
+    res.json({ ok: true, action: "close", result, symbol });
+
+    const chartBuffer = await getChartBuffer(symbol);
+    let imgClose = null;
+    if (chartBuffer) {
+      imgClose = saveScreenshot(chartBuffer, `close_${symbol}`);
+      await sendTelegramPhoto(msg, chartBuffer);
+    } else {
+      await sendTelegram(msg);
+    }
+
+    const openTrade  = pending[symbol] || null;
+    const imgOpen    = openTrade ? openTrade.imgOpen : null;
+    if (pending[symbol]) delete pending[symbol];
+
+    const pen = openTrade || {};
+    const tradeEntry = pen.entry;
+    const tradeSL    = pen.sl;
+    const tradeTP    = pen.tp;
+    const tradeRisk  = pen.risk;
+    const rr = tradeEntry && tradeSL && tradeTP
+      ? (Math.abs(parseFloat(tradeTP) - parseFloat(tradeEntry)) / Math.abs(parseFloat(tradeEntry) - parseFloat(tradeSL))).toFixed(2)
+      : null;
+
+    const trade = {
+      symbol,
+      date:      pen.date || getTradingDate(),
+      session:   pen.session || "NY",
+      entry:     tradeEntry,
+      sl:        tradeSL,
+      tp:        tradeTP,
+      exit:      exit,
+      result,
+      rr,
+      imgOpen,
+      imgClose,
+      risk:      tradeRisk,
+      direction: pen.direction || direction,
+      ts:        pen.ts || Date.now(),
+      tsClose:   Date.now(),
+      orphan:    !openTrade,
+    };
+
+    const trades = readTrades();
+    trades.push(trade);
+    writeTrades(trades);
+    console.log(`[MNQ ${result}] Trade logged. imgOpen: ${imgOpen} imgClose: ${imgClose}`);
+  } catch (err) {
+    console.error(`[MNQ CLOSE] Error:`, err.message);
+  }
+}
+
 // ─── ROUTES ───────────────────────────────────────────────────────────────────
 app.get("/", (req, res) => res.json({ status: "ALA VPS online", version: "2.0.0" }));
 
@@ -392,13 +521,19 @@ app.use(express.static(path.join(__dirname, "public")));
 // Unified webhook
 app.post("/signal", async (req, res) => {
   if (!authCheck(req, res)) return;
-  const raw  = req.body.action;
-  const code = parseInt(raw);
-  console.log("[/signal] action raw:", raw, "parsed:", code, "body:", JSON.stringify(req.body));
+  const { action, symbol } = req.body;
+  console.log("[/signal] action:", action, "symbol:", symbol, "body:", JSON.stringify(req.body));
+
+  // MNQ uses string actions: "entry", "tp", "sl"
+  if (action === "entry") return handleMNQOpen(req, res);
+  if (action === "tp")    return handleMNQClose(req, res, true);
+  if (action === "sl")    return handleMNQClose(req, res, false);
+
+  // Gold/BTC uses numeric action codes
+  const code = parseInt(action);
   if (code === 2 || code === 3) return handleClose(req, res, code);
   if (code === 4) return handlePartial(req, res);
   if (code === 5) return handleBE(req, res);
-  // Default to open for action=1, NaN, undefined, or any unrecognized value
   return handleOpen(req, res);
 });
 
