@@ -303,7 +303,7 @@
     font-weight: 600;
   }
 
-  .badge.win { background: var(--green-dark); color: var(--green); border: 1px solid var(--green-dim); }
+  .badge.win { background: #003310; color: #00ff41; border: 1px solid #00c032; }
   .badge.loss { background: var(--red-dark); color: var(--red); border: 1px solid var(--red); }
   .badge.open { background: #001a2a; color: var(--cyan); border: 1px solid var(--cyan); }
   .badge.be { background: #001a2a; color: #00ccff; border: 1px solid #00ccff; }
@@ -789,7 +789,7 @@ function render() {
   const donutData   = [wins.length, losses.length, bes.length];
   const donutKeys   = ['WIN', 'LOSS', 'PARTIAL'];
   const donutLabels = ['Win', 'Loss', 'PARTIAL'];
-  const donutColors = ['#00b4d8', '#ff2244', '#00ccff'];
+  const donutColors = ['#00ff41', '#ff2244', '#00ccff'];
 
   // Legend with click filter
   document.getElementById('donut-label').textContent = closed.length ? wins.length + 'W / ' + losses.length + 'L' : '—';
