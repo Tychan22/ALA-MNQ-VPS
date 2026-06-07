@@ -17,6 +17,7 @@ const SECRET   = process.env.WEBHOOK_SECRET || "";
 const SYMBOL   = process.env.SYMBOL || "XAUUSD";
 
 const isBTC = SYMBOL.includes("BTC");
+const isMNQ = SYMBOL.includes("MNQ");
 
 const headers = {
   "Content-Type": "application/json",
@@ -32,6 +33,16 @@ const fakeOpen = isBTC ? {
   tp:        "62500.00",
   exit:      "61000.00",
   timestamp: Date.now().toString(),
+} : isMNQ ? {
+  symbol:    "MNQ1!",
+  interval:  "3",
+  action:    "1",
+  entry:     "21000.00",
+  sl:        "20950.00",
+  tp:        "21100.00",
+  exit:      "21000.00",
+  session:   "NY",
+  timestamp: new Date().toISOString(),
 } : {
   symbol:    "XAUUSD",
   interval:  "5",
@@ -53,6 +64,16 @@ const fakeClose = isBTC ? {
   tp:        "62500.00",
   exit:      "62500.00",
   timestamp: Date.now().toString(),
+} : isMNQ ? {
+  symbol:    "MNQ1!",
+  interval:  "3",
+  action:    "3",
+  entry:     "21000.00",
+  sl:        "20950.00",
+  tp:        "21100.00",
+  exit:      "20950.00",
+  session:   "NY",
+  timestamp: new Date().toISOString(),
 } : {
   symbol:    "XAUUSD",
   interval:  "5",
