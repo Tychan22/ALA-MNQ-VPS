@@ -192,7 +192,7 @@ async function handleOpen(req, res) {
 
 // ─── CLOSE HANDLER ────────────────────────────────────────────────────────────
 async function handleClose(req, res, code) {
-  const { symbol = "XAUUSD", entry, exit, tp, sl, session, timestamp } = req.body;
+  const { symbol = "XAUUSD", entry, exit, tp, sl, session, timestamp, rr: payloadRR } = req.body;
   const isWin  = code === 2;
   const result = isWin ? "WIN" : "LOSS";
   console.log("[CLOSE]", req.body);
