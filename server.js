@@ -20,7 +20,7 @@ const DATA_DIR     = process.env.DATA_DIR || path.join(__dirname);
 const TRADES_FILE  = path.join(DATA_DIR, "trades.json");
 const SCREENS_DIR  = path.join(DATA_DIR, "screenshots");
 
-if (!fs.existsSync(SCREENS_DIR)) fs.mkdirSync(SCREENS_DIR);
+if (!fs.existsSync(SCREENS_DIR)) fs.mkdirSync(SCREENS_DIR, { recursive: true });
 
 function readTrades() {
   try {
@@ -77,11 +77,11 @@ const pending = {};
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 async function getChartBuffer(symbol = "XAUUSD") {
   if (!CHART_IMG_KEY) return null;
-  const layoutId = symbol.includes("BTC") ? "73EEecm3" : "elAti8iP";
+  const layoutId = symbol.includes("BTC") ? "73EEecm3" : symbol.includes("MNQ") ? "3DhROcei" : "elAti8iP";
   try {
     const res = await axios.post(
       "https://api.chart-img.com/v2/tradingview/layout-chart/" + layoutId,
-      { symbol: symbol.includes("BTC") ? "COINBASE:BTCUSD" : "OANDA:XAUUSD", interval: symbol.includes("BTC") ? "3m" : "5m" },
+      { symbol: symbol.includes("BTC") ? "COINBASE:BTCUSD" : symbol.includes("MNQ") ? "CME_MINI:NQ1!" : "OANDA:XAUUSD", interval: symbol.includes("BTC") ? "3m" : symbol.includes("MNQ") ? "3m" : "5m" },
       { headers: { "x-api-key": CHART_IMG_KEY, "content-type": "application/json" }, responseType: "arraybuffer" }
     );
     return Buffer.from(res.data);
