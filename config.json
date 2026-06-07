@@ -1,0 +1,22 @@
+{
+  "pairs": {
+    "XAUUSD": {
+      "layoutId": "elAti8iP",
+      "chartSymbol": "OANDA:XAUUSD",
+      "interval": "5m",
+      "name": "Gold"
+    },
+    "BTCUSDT": {
+      "layoutId": "73EEecm3",
+      "chartSymbol": "COINBASE:BTCUSD",
+      "interval": "3m",
+      "name": "Bitcoin"
+    },
+    "MNQ1!": {
+      "layoutId": "3DhROcei",
+      "chartSymbol": "CME_MINI:NQ1!",
+      "interval": "3m",
+      "name": "Micro NQ"
+    }
+  }
+}

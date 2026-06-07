@@ -1,4 +1,12 @@
 require("dotenv").config();
+const path_temp = require("path");
+const fs_temp   = require("fs");
+const _configPath = path_temp.join(__dirname, "config.json");
+const pairConfig  = fs_temp.existsSync(_configPath) ? JSON.parse(fs_temp.readFileSync(_configPath, "utf8")).pairs || {} : {};
+function getPairConfig(symbol) {
+  const key = Object.keys(pairConfig).find(k => symbol && (symbol.includes(k) || k.includes(symbol)));
+  return key ? pairConfig[key] : null;
+}
 const express  = require("express");
 const axios    = require("axios");
 const fs       = require("fs");
@@ -77,11 +85,14 @@ const pending = {};
 // ─── HELPERS ──────────────────────────────────────────────────────────────────
 async function getChartBuffer(symbol = "XAUUSD") {
   if (!CHART_IMG_KEY) return null;
-  const layoutId = symbol.includes("BTC") ? "73EEecm3" : symbol.includes("MNQ") ? "3DhROcei" : "elAti8iP";
+  const cfg = getPairConfig(symbol);
+  const layoutId   = cfg ? cfg.layoutId   : "elAti8iP";
+  const chartSym   = cfg ? cfg.chartSymbol : "OANDA:XAUUSD";
+  const interval   = cfg ? cfg.interval    : "5m";
   try {
     const res = await axios.post(
       "https://api.chart-img.com/v2/tradingview/layout-chart/" + layoutId,
-      { symbol: symbol.includes("BTC") ? "COINBASE:BTCUSD" : symbol.includes("MNQ") ? "CME_MINI:NQ1!" : "OANDA:XAUUSD", interval: symbol.includes("BTC") ? "3m" : symbol.includes("MNQ") ? "3m" : "5m" },
+      { symbol: chartSym, interval },
       { headers: { "x-api-key": CHART_IMG_KEY, "content-type": "application/json" }, responseType: "arraybuffer" }
     );
     return Buffer.from(res.data);
