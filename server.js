@@ -359,7 +359,7 @@ async function handleBE(req, res) {
       sl:        tradeSL,
       tp:        tradeTP,
       exit:      exit || tradeEntry,
-      result:    "BE",
+      result:    "PARTIAL",
       rr,
       imgOpen,
       imgClose,
