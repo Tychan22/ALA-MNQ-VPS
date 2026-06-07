@@ -911,7 +911,7 @@ function render() {
         <td><span class="badge ${biasClass}">${biasLabel}</span></td>
         <td>${t.entry || '—'}</td>
         <td style="color:var(--red)">${t.sl || '—'}</td>
-        <td style="color:var(--amber)">${t.tp || '—'}</td>
+        <td style="color:var(--text)">${t.tp || '—'}</td>
         <td>${t.exit || '—'}</td>
         <td style="color:var(--amber)">${t.pnl !== null && t.pnl !== undefined && t.risk ? effectiveRR(t.pnl, t.risk) + ':1' : t.rr ? (parseFloat(t.rr) % 1 === 0 ? parseInt(t.rr) : parseFloat(t.rr).toFixed(1)) + ':1' : '—'}</td>
         <td><span class="badge ${badgeClass}">${result}</span></td>
@@ -1058,7 +1058,7 @@ function openPopup(t) {
   document.getElementById('popup-title').textContent = `${t.symbol || 'XAUUSD'} // ${t.result || 'OPEN'} // ${t.date || '—'}`;
   const entryTime = t.ts ? new Date(t.ts).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false}) : '—';
   const exitTime  = t.tsClose ? new Date(t.tsClose).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false}) : '—';
-  document.getElementById('popup-meta').innerHTML = `${t.session || '—'} SESSION &nbsp;·&nbsp; <span style="color:#ffaa00">ENTRY ${entryTime}</span> &nbsp;·&nbsp; <span style="color:#ffaa00">EXIT ${exitTime}</span>`;
+  document.getElementById('popup-meta').innerHTML = `${t.session || '—'} SESSION &nbsp;·&nbsp; <span style="color:#00ff41">ENTRY ${entryTime}</span> &nbsp;·&nbsp; <span style="color:var(--red)">EXIT ${exitTime}</span>`;
 
   const imgOpen  = document.getElementById('popup-img-open');
   const imgClose = document.getElementById('popup-img-close');
@@ -1089,7 +1089,9 @@ function openPopup(t) {
     pnlEl.textContent = (t.pnl >= 0 ? '+' : '') + '$' + t.pnl;
     pnlEl.className   = t.pnl >= 0 ? '' : 'red';
   } else { pnlEl.textContent = '—'; }
-  document.getElementById('ps-dur').textContent = t.ts && t.tsClose ? formatDuration(t.tsClose - t.ts) : '—';
+  const durEl = document.getElementById('ps-dur');
+  durEl.textContent = t.ts && t.tsClose ? formatDuration(t.tsClose - t.ts) : '—';
+  durEl.style.color = t.pnl !== null && t.pnl !== undefined ? (t.pnl >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--text-dim)';
 
   document.getElementById('popup').classList.add('active');
 }
@@ -1123,11 +1125,11 @@ function closePopup(e) {
     <div class="popup-stats">
       <div class="popup-stat">ENTRY <span id="ps-entry">—</span></div>
       <div class="popup-stat">STOP <span class="red" id="ps-sl">—</span></div>
-      <div class="popup-stat">TARGET <span class="amber" id="ps-tp">—</span></div>
+      <div class="popup-stat">TARGET <span id="ps-tp">—</span></div>
       <div class="popup-stat">EXIT <span id="ps-exit">—</span></div>
       <div class="popup-stat">R:R <span class="amber" id="ps-rr">—</span></div>
       <div class="popup-stat">PNL <span id="ps-pnl">—</span></div>
-      <div class="popup-stat">DURATION <span id="ps-dur" style="color:var(--text-dim)">—</span></div>
+      <div class="popup-stat">DURATION <span id="ps-dur">—</span></div>
     </div>
   </div>
 </div>
