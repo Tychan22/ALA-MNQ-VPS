@@ -18,6 +18,7 @@ const SYMBOL   = process.env.SYMBOL || "XAUUSD";
 
 const isBTC = SYMBOL.includes("BTC");
 const isMNQ = SYMBOL.includes("MNQ");
+const mnqDir = Math.random() > 0.5 ? 'LONG' : 'SHORT';
 
 const headers = {
   "Content-Type": "application/json",
@@ -36,7 +37,7 @@ const fakeOpen = isBTC ? {
 } : isMNQ ? {
   symbol:    "MNQ1!",
   action:    "entry",
-  type:      "LONG",
+  type:      mnqDir,
   entry:     "21000.00",
   sl:        "20950.00",
   tp:        "21100.00",
@@ -66,7 +67,7 @@ const fakeClose = isBTC ? {
 } : isMNQ ? {
   symbol:    "MNQ1!",
   action:    "tp",
-  type:      "LONG",
+  type:      mnqDir,
   exit:      "21100.00",
   timestamp: Date.now().toString(),
 } : {
