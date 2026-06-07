@@ -3,26 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ALA TEST LOGS</title>
+<title>ALA MNQ LOGS</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
 
   :root {
-    --bg: #0a0700;
-    --bg2: #0f0a00;
-    --bg3: #150d00;
-    --border: #2e1a00;
-    --green: #ff8c00;
-    --green-dim: #cc6f00;
-    --green-dark: #2a1500;
+    --bg: #00070a;
+    --bg2: #000d12;
+    --bg3: #001018;
+    --border: #00293d;
+    --green: #00b4d8;
+    --green-dim: #0096c7;
+    --green-dark: #001a2e;
     --red: #ff2244;
     --red-dark: #330010;
     --amber: #ffaa00;
     --cyan: #00ffcc;
-    --text: #ffb347;
-    --text-dim: #7a4f00;
-    --text-muted: #3a2000;
+    --text: #90e0ef;
+    --text-dim: #00698a;
+    --text-muted: #002a3a;
     --mono: 'Share Tech Mono', monospace;
     --sans: 'Rajdhani', sans-serif;
   }
@@ -561,7 +561,7 @@
 <div class="shell">
 
   <header>
-    <div class="logo">ALA <span>//</span> TEST</div>
+    <div class="logo">ALA <span>//</span> MNQ</div>
     <div class="status">
       <div class="dot"></div>
       <span id="last-sync">SYNCING...</span>
@@ -623,7 +623,7 @@
       <div class="panel-title">Calendar <span id="cal-month">—</span></div>
       <div class="cal-grid" id="cal-labels"></div>
       <div class="cal-grid" id="cal-grid"></div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-top:1px solid #1a2e1a;margin-top:14px;padding-top:12px;text-align:center;font-size:9px;letter-spacing:2px;color:#7a4f00;">SYSTEM UPTIME<br><span id="uptime-counter" style="color:#ff8c00;font-family:Rajdhani,sans-serif;font-size:18px;font-weight:700;margin-top:4px;display:block;">—</span><span style="font-size:8px;color:#3a2000;letter-spacing:2px;margin-top:4px;display:block;">SINCE JUN 05 2026</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-top:1px solid #1a2e1a;margin-top:14px;padding-top:12px;text-align:center;font-size:9px;letter-spacing:2px;color:#00698a;">SYSTEM UPTIME<br><span id="uptime-counter" style="color:#00b4d8;font-family:Rajdhani,sans-serif;font-size:18px;font-weight:700;margin-top:4px;display:block;">—</span><span style="font-size:8px;color:#002a3a;letter-spacing:2px;margin-top:4px;display:block;">SINCE JUN 07 2026</span></div>
           </div>
 
   </div>
@@ -661,7 +661,7 @@
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
-const VPS_URL = 'https://ala-test-vps-production.up.railway.app';
+const VPS_URL = 'https://ala-mnq-vps-production.up.railway.app';
 const DEFAULT_RISK = 300; // fallback if risk not in payload
 
 // ── MATRIX ───────────────────────────────────────────────────────────────────
@@ -672,12 +672,12 @@ canvas.height = window.innerHeight;
 
 const cols = Math.floor(canvas.width / 14);
 const drops = Array(cols).fill(1);
-const chars  = 'ALABTCUSDBREAKOUTTESTLONGSWEEP0123456789$₿⚡';
+const chars  = 'ALAMNQFUTURESBREAKOUTLONGNASDAQ0123456789$⚡';
 
 function drawMatrix() {
   ctx.fillStyle = 'rgba(5,10,5,0.05)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#ff8c00';
+  ctx.fillStyle = '#00b4d8';
   ctx.font = '12px Share Tech Mono';
   drops.forEach((y, i) => {
     const char = chars[Math.floor(Math.random() * chars.length)];
@@ -706,13 +706,21 @@ function calcRR(entry, sl, tp) {
   return risk > 0 ? (reward / risk).toFixed(2) : null;
 }
 
+// ── PNL CONFIG ────────────────────────────────────────────────────────────────
+// Swap out this function to change how PnL is calculated per strategy.
+// Current: assumes partials at 1R (half size), full TP at originalRR
+//   WIN  = (risk/2 × 1R) + (risk/2 × originalRR)
+//   BE   = risk/2 (only partial secured)
+//   LOSS = -risk (full stop, no partial)
+// To change: edit the formulas below. risk = dollar risk, rr = signal R:R ratio.
+// ──────────────────────────────────────────────────────────────────────────────
 function calcPnl(result, rr, risk) {
-  const R = parseFloat(risk) || DEFAULT_RISK;
-  const halfR = R / 2;
+  const R      = parseFloat(risk) || DEFAULT_RISK;
+  const halfR  = R / 2;
   const fullRR = parseFloat(rr) || 1;
-  if (result === 'WIN')  return +((halfR) + (halfR * fullRR)).toFixed(0); // partial + remaining
+  if (result === 'WIN')  return +((halfR) + (halfR * fullRR)).toFixed(0);
   if (result === 'LOSS') return -R;
-  if (result === 'PARTIAL')   return +halfR.toFixed(0); // only partial secured
+  if (result === 'PARTIAL')   return +halfR.toFixed(0);
   return null;
 }
 
@@ -781,7 +789,7 @@ function render() {
   const donutData   = [wins.length, losses.length, bes.length];
   const donutKeys   = ['WIN', 'LOSS', 'PARTIAL'];
   const donutLabels = ['Win', 'Loss', 'PARTIAL'];
-  const donutColors = ['#ff8c00', '#ff2244', '#00ccff'];
+  const donutColors = ['#00b4d8', '#ff2244', '#00ccff'];
 
   // Legend with click filter
   document.getElementById('donut-label').textContent = closed.length ? wins.length + 'W / ' + losses.length + 'L' : '—';
@@ -829,8 +837,6 @@ function render() {
   const pnlCtx = document.getElementById('pnlchart').getContext('2d');
   let running = 0;
   const pnlLabels = ['Start', ...closed.map(t => t.date || '—')];
-  const pnlValues = [0, ...closed.map(t => { running += (t.pnl || 0); return running; })];
-  // Reset running for proper accumulation
   running = 0;
   const pnlValuesFixed = [0, ...closed.map(t => { running += (t.pnl || 0); return running; })];
   pnlChart = new Chart(pnlCtx, {
@@ -839,12 +845,12 @@ function render() {
       labels: pnlLabels,
       datasets: [{
         data: pnlValuesFixed,
-        borderColor: totalPnl >= 0 ? '#ff8c00' : '#ff2244',
+        borderColor: totalPnl >= 0 ? '#00b4d8' : '#ff2244',
         borderWidth: 2,
-        pointBackgroundColor: totalPnl >= 0 ? '#ff8c00' : '#ff2244',
+        pointBackgroundColor: totalPnl >= 0 ? '#00b4d8' : '#ff2244',
         pointRadius: 4,
         fill: true,
-        backgroundColor: totalPnl >= 0 ? 'rgba(255,140,0,0.06)' : 'rgba(255,34,68,0.06)',
+        backgroundColor: totalPnl >= 0 ? 'rgba(0,255,65,0.06)' : 'rgba(255,34,68,0.06)',
         tension: 0.3,
       }]
     },
@@ -853,19 +859,19 @@ function render() {
         x: {
           display: true,
           ticks: {
-            color: '#7a4f00',
+            color: '#00698a',
             font: { family: 'Share Tech Mono', size: 9 },
             maxRotation: 45,
             maxTicksLimit: 8,
           },
           grid: { display: false },
-          border: { color: '#2e1a00' }
+          border: { color: '#1a2e1a' }
         },
         y: {
-          ticks: { color: '#7a4f00', font: { family: 'Share Tech Mono', size: 10 },
+          ticks: { color: '#00698a', font: { family: 'Share Tech Mono', size: 10 },
                    callback: v => '$' + v },
-          grid: { color: '#150d00' },
-          border: { color: '#2e1a00' }
+          grid: { color: '#0d150d' },
+          border: { color: '#1a2e1a' }
         }
       },
       plugins: { legend: { display: false }, tooltip: {
@@ -1006,7 +1012,7 @@ syncFromVPS();
 setInterval(syncFromVPS, 30000);
 
 // ── UPTIME COUNTER ────────────────────────────────────────────────────────────
-const START_DATE = new Date('2026-06-05T00:00:00-04:00'); // May 31 2026 EST
+const START_DATE = new Date('2026-06-07T00:00:00-04:00'); // May 31 2026 EST
 
 function updateUptime() {
   const now   = new Date();
@@ -1052,7 +1058,7 @@ function openPopup(t) {
   document.getElementById('popup-title').textContent = `${t.symbol || 'XAUUSD'} // ${t.result || 'OPEN'} // ${t.date || '—'}`;
   const entryTime = t.ts ? new Date(t.ts).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false}) : '—';
   const exitTime  = t.tsClose ? new Date(t.tsClose).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false}) : '—';
-  document.getElementById('popup-meta').innerHTML = `${t.session || '—'} SESSION &nbsp;·&nbsp; <span style="color:#ff8c00">ENTRY ${entryTime}</span> &nbsp;·&nbsp; <span style="color:#ff8c00">EXIT ${exitTime}</span>`;
+  document.getElementById('popup-meta').innerHTML = `${t.session || '—'} SESSION &nbsp;·&nbsp; <span style="color:#ffaa00">ENTRY ${entryTime}</span> &nbsp;·&nbsp; <span style="color:#ffaa00">EXIT ${exitTime}</span>`;
 
   const imgOpen  = document.getElementById('popup-img-open');
   const imgClose = document.getElementById('popup-img-close');
@@ -1073,8 +1079,8 @@ function openPopup(t) {
   if (!t.imgClose) { imgClose.style.display = 'none'; if (clNS) clNS.style.display = 'flex'; }
 
   document.getElementById('ps-entry').textContent = t.entry || '—';
-  document.getElementById('ps-sl').textContent    = t.sl    || '—'; // STOP
-  document.getElementById('ps-tp').textContent    = t.tp    || '—'; // TARGET
+  document.getElementById('ps-sl').textContent    = t.sl    || '—';
+  document.getElementById('ps-tp').textContent    = t.tp    || '—';
   document.getElementById('ps-exit').textContent  = t.exit  || '—';
   document.getElementById('ps-rr').textContent    = t.rr ? t.rr + ':1' : '—';
 
@@ -1121,7 +1127,7 @@ function closePopup(e) {
       <div class="popup-stat">EXIT <span id="ps-exit">—</span></div>
       <div class="popup-stat">R:R <span class="amber" id="ps-rr">—</span></div>
       <div class="popup-stat">PNL <span id="ps-pnl">—</span></div>
-      <div class="popup-stat">DURATION <span id="ps-dur" class="amber">—</span></div>
+      <div class="popup-stat">DURATION <span id="ps-dur" style="color:var(--text-dim)">—</span></div>
     </div>
   </div>
 </div>
