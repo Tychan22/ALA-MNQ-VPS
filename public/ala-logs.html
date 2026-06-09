@@ -718,7 +718,7 @@ function calcPnl(result, rr, risk) {
   const R      = parseFloat(risk) || DEFAULT_RISK;
   const halfR  = R / 2;
   const fullRR = parseFloat(rr) || 1;
-  if (result === 'WIN')  return +((halfR) + (halfR * fullRR)).toFixed(0);
+  if (result === 'WIN')  return +(R * fullRR).toFixed(0);
   if (result === 'LOSS') return -R;
   if (result === 'PARTIAL')   return +halfR.toFixed(0);
   return null;
