@@ -575,4 +575,128 @@ app.delete("/trades/:index", (req, res) => {
   res.json({ ok: true, total: trades.length });
 });
 
+// ─── HERMES — AI ANALYSIS ─────────────────────────────────────────────────────
+const Anthropic = require("@anthropic-ai/sdk");
+
+async function runHermesAnalysis(focusPrompt = null) {
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const trades  = readTrades();
+  const closed  = trades.filter(t => t.result === "WIN" || t.result === "LOSS" || t.result === "PARTIAL");
+
+  if (closed.length === 0) return "No closed trades to analyze yet.";
+
+  const wins   = closed.filter(t => t.result === "WIN").length;
+  const losses = closed.filter(t => t.result === "LOSS").length;
+  const wr     = ((wins / closed.length) * 100).toFixed(1);
+  const totalPnl = closed.reduce((s, t) => s + (t.pnl || (t.result === "WIN" ? parseFloat(t.risk || 0) * parseFloat(t.rr || 2) : -(parseFloat(t.risk || 0)))), 0);
+
+  // Build content array — trade metadata + screenshots as vision blocks
+  const content = [];
+
+  // System context block
+  content.push({
+    type: "text",
+    text: `You are Hermes, an AI trading analyst for ALA (Autonomous Learning Algorithm) — a MNQ futures spotter system.
+
+TRADE SUMMARY:
+- Total closed trades: ${closed.length}
+- Wins: ${wins} | Losses: ${losses}
+- Win rate: ${wr}% (breakeven at 2:1 RR is 33.4%)
+- Estimated total PnL: $${totalPnl.toFixed(0)}
+- Instrument: MNQ1! (Micro Nasdaq futures), 5-minute chart
+- Setup types: LONG, SHORT, BD_LONG (breakout long), BD_SHORT (breakdown short)
+- Risk per trade: $400, Target: 2:1 RR ($800 win / $400 loss)
+
+TRADE DATA (JSON):
+${JSON.stringify(closed.map(t => ({
+  date: t.date,
+  session: t.session,
+  direction: t.direction,
+  result: t.result,
+  entry: t.entry,
+  sl: t.sl,
+  tp: t.tp,
+  exit: t.exit,
+  rr: t.rr,
+  risk: t.risk,
+  hasOpenChart: !!t.imgOpen,
+  hasCloseChart: !!t.imgClose,
+})), null, 2)}
+
+${focusPrompt
+  ? `SPECIFIC FOCUS: ${focusPrompt}`
+  : `ANALYSIS REQUESTED:
+1. Pattern recognition — what do the losing trades have in common? (direction, session, setup type, timing)
+2. What are the winning trades doing differently?
+3. Looking at the chart screenshots provided, identify any visual patterns (wick size, EMA position, candle structure) that correlate with wins vs losses
+4. What 1-2 specific filters would most improve win rate based on this data?
+5. Run a basic Monte Carlo assessment — at current win rate + RR, what is the probability of hitting a 5% prop firm drawdown limit over the next 20 trades?`
+}`
+  });
+
+  // Attach screenshots for each trade
+  let imgCount = 0;
+  for (const trade of closed) {
+    const label = `${trade.date} ${trade.direction} → ${trade.result}`;
+
+    if (trade.imgOpen) {
+      const fpath = path.join(DATA_DIR, trade.imgOpen.replace(/^\//, ""));
+      if (fs.existsSync(fpath)) {
+        try {
+          const b64 = fs.readFileSync(fpath).toString("base64");
+          content.push({ type: "text", text: `ENTRY chart — ${label}:` });
+          content.push({ type: "image", source: { type: "base64", media_type: "image/png", data: b64 } });
+          imgCount++;
+        } catch {}
+      }
+    }
+
+    if (trade.imgClose) {
+      const fpath = path.join(DATA_DIR, trade.imgClose.replace(/^\//, ""));
+      if (fs.existsSync(fpath)) {
+        try {
+          const b64 = fs.readFileSync(fpath).toString("base64");
+          content.push({ type: "text", text: `EXIT chart — ${label}:` });
+          content.push({ type: "image", source: { type: "base64", media_type: "image/png", data: b64 } });
+          imgCount++;
+        } catch {}
+      }
+    }
+  }
+
+  console.log(`[HERMES] Sending ${closed.length} trades + ${imgCount} screenshots to Claude`);
+
+  const response = await client.messages.create({
+    model: "claude-opus-4-6",
+    max_tokens: 2048,
+    messages: [{ role: "user", content }],
+  });
+
+  return response.content[0].text;
+}
+
+// POST /hermes/analyze — on-demand analysis with optional focus
+app.post("/hermes/analyze", async (req, res) => {
+  try {
+    const { focus } = req.body;
+    console.log("[HERMES] Analysis requested, focus:", focus || "general");
+    const analysis = await runHermesAnalysis(focus || null);
+    res.json({ ok: true, analysis });
+  } catch (err) {
+    console.error("[HERMES] Error:", err.message);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
+// GET /hermes/analyze — quick trigger from browser/dashboard
+app.get("/hermes/analyze", async (req, res) => {
+  try {
+    const analysis = await runHermesAnalysis(req.query.focus || null);
+    res.json({ ok: true, analysis });
+  } catch (err) {
+    console.error("[HERMES] Error:", err.message);
+    res.status(500).json({ ok: false, error: err.message });
+  }
+});
+
 app.listen(PORT, () => console.log(`✅ ALA VPS listening on port ${PORT}`));
