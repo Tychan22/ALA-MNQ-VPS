@@ -602,19 +602,31 @@ function closePopup(e) {
 
 // ── SETTINGS ─────────────────────────────────────────────────────────────────
 let autotradingOn = false;
-function openSettingsWrapper() { openSettings(); }
-async function openSettings() {
+function openSettingsWrapper() {
+  // Show immediately from localStorage
   document.getElementById('lune-webhook').value = localStorage.getItem('ala_mnq_lune_webhook') || '';
   document.getElementById('lune-strategy-id').value = localStorage.getItem('ala_mnq_lune_strategy_id') || '';
   document.getElementById('settings-status').textContent = '';
-  // Load from VPS too
-  try {
-    const r = await fetch(VPS_URL + '/settings');
-    const s = await r.json();
+  const sw = document.getElementById('autotrading-sw');
+  autotradingOn = localStorage.getItem('ala_mnq_autotrading') === 'true';
+  sw.className = 'toggle-switch' + (autotradingOn ? ' on' : '');
+  document.getElementById('at-status').textContent = autotradingOn ? 'ENABLED' : 'DISABLED';
+  document.getElementById('at-status').className = 'autotrading-status ' + (autotradingOn ? 'on' : 'off');
+  document.getElementById('settings-overlay').classList.add('active');
+  // Then try to load fresh from VPS in background
+  fetch(VPS_URL + '/settings').then(r => r.json()).then(s => {
     if (s.luneWebhook)    document.getElementById('lune-webhook').value = s.luneWebhook;
     if (s.luneStrategyId) document.getElementById('lune-strategy-id').value = s.luneStrategyId;
-    if (s.autotrading !== undefined) autotradingOn = s.autotrading;
-  } catch {}
+    if (s.autotrading !== undefined) {
+      autotradingOn = s.autotrading;
+      document.getElementById('autotrading-sw').className = 'toggle-switch' + (autotradingOn ? ' on' : '');
+      document.getElementById('at-status').textContent = autotradingOn ? 'ENABLED' : 'DISABLED';
+      document.getElementById('at-status').className = 'autotrading-status ' + (autotradingOn ? 'on' : 'off');
+    }
+  }).catch(() => {});
+}
+async function openSettings() {
+  document.getElementById('settings-status').textContent = '';
   const sw = document.getElementById('autotrading-sw');
   autotradingOn = localStorage.getItem('ala_mnq_autotrading') === 'true';
   sw.className = 'toggle-switch' + (autotradingOn ? ' on' : '');
