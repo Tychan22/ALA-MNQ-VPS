@@ -171,7 +171,7 @@
         <span id="last-sync">SYNCING...</span>
       </div>
       <a href="/ala-hermes.html" style="text-decoration:none"><button class="btn" style="padding:5px 14px;font-size:10px">⚡ HERMES</button></a>
-      <button class="btn" onclick="openSettings()" style="padding:5px 14px;font-size:10px">⚙ SETTINGS</button>
+      <button class="btn" onclick="openSettingsWrapper()" style="padding:5px 14px;font-size:10px">⚙ SETTINGS</button>
     </div>
   </header>
 
@@ -237,7 +237,7 @@
       <div class="panel-title">Calendar <span id="cal-month">—</span></div>
       <div class="cal-grid" id="cal-labels"></div>
       <div class="cal-grid" id="cal-grid"></div>
-      <div ondblclick="openSettings()" style="cursor:pointer;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-top:1px solid var(--border);margin-top:14px;padding-top:12px;text-align:center;font-size:9px;letter-spacing:2px;color:var(--text-dim);">
+      <div ondblclick="openSettingsWrapper()" style="cursor:pointer;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-top:1px solid var(--border);margin-top:14px;padding-top:12px;text-align:center;font-size:9px;letter-spacing:2px;color:var(--text-dim);">
         PHASE 2 UPTIME<br>
         <span id="uptime-counter" style="color:var(--green);font-family:Rajdhani,sans-serif;font-size:18px;font-weight:700;margin-top:4px;display:block;">—</span>
         <span id="phase2-date" style="font-size:8px;color:var(--text-muted);letter-spacing:2px;margin-top:4px;display:block;">SINCE JUL 15 2026</span>
@@ -602,6 +602,7 @@ function closePopup(e) {
 
 // ── SETTINGS ─────────────────────────────────────────────────────────────────
 let autotradingOn = false;
+function openSettingsWrapper() { openSettings(); }
 async function openSettings() {
   document.getElementById('lune-webhook').value = localStorage.getItem('ala_mnq_lune_webhook') || '';
   document.getElementById('lune-strategy-id').value = localStorage.getItem('ala_mnq_lune_strategy_id') || '';
