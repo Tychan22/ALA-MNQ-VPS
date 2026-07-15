@@ -9,566 +9,152 @@
   @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
 
   :root {
-    --bg: #00070a;
-    --bg2: #000d12;
-    --bg3: #001018;
-    --border: #00293d;
-    --green: #00b4d8;
-    --green-dim: #0096c7;
-    --green-dark: #001a2e;
+    --bg: #050a0f;
+    --bg2: #090f18;
+    --bg3: #0d1520;
+    --border: #1a2e4a;
+    --green: #00ccff;
+    --green-dim: #0099cc;
+    --green-dark: #001a2a;
     --red: #ff2244;
     --red-dark: #330010;
     --amber: #ffaa00;
     --cyan: #00ffcc;
-    --text: #90e0ef;
-    --text-dim: #00698a;
-    --text-muted: #002a3a;
+    --text: #8acfff;
+    --text-dim: #3a6e9e;
+    --text-muted: #1e3e5e;
     --mono: 'Share Tech Mono', monospace;
     --sans: 'Rajdhani', sans-serif;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+  body { background: var(--bg); color: var(--text); font-family: var(--mono); min-height: 100vh; overflow-x: hidden; }
 
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--mono);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
+  #matrix { position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.06; pointer-events: none; z-index: 0; }
 
-  /* ── MATRIX CANVAS ── */
-  #matrix {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    opacity: 0.07;
-    pointer-events: none;
-    z-index: 0;
-  }
+  .shell { position: relative; z-index: 1; max-width: 1500px; margin: 0 auto; padding: 24px; }
 
-  /* ── LAYOUT ── */
-  .shell {
-    position: relative;
-    z-index: 1;
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 24px;
-  }
-
-  /* ── HEADER ── */
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 28px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .logo {
-    font-family: var(--sans);
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: 6px;
-    color: var(--green);
-    text-shadow: 0 0 20px rgba(0,255,65,0.4);
-  }
-
+  header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+  .logo { font-family: var(--sans); font-size: 28px; font-weight: 700; letter-spacing: 6px; color: var(--green); text-shadow: 0 0 20px rgba(0,204,255,0.4); }
   .logo span { color: var(--text-dim); }
+  .header-right { display: flex; align-items: center; gap: 16px; }
+  .status { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--text-dim); letter-spacing: 2px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .nav-link {
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-    text-decoration: none;
-    border: 1px solid var(--border);
-    padding: 6px 14px;
-    transition: all 0.15s;
-  }
-  .nav-link:hover { color: var(--green); border-color: var(--green-dim); }
-
-  .status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    color: var(--text-dim);
-    letter-spacing: 2px;
-  }
-
-  .dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 8px var(--green);
-    animation: pulse 2s infinite;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-  }
-
-  /* ── STAT CARDS ── */
-  .cards {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-
-  .card {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-top: 2px solid var(--green-dim);
-    padding: 16px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 40px;
-    background: linear-gradient(180deg, rgba(0,255,65,0.04) 0%, transparent 100%);
-  }
-
-  .card-label {
-    font-size: 9px;
-    letter-spacing: 3px;
-    color: var(--text-dim);
-    margin-bottom: 8px;
-    text-transform: uppercase;
-  }
-
-  .card-value {
-    font-family: var(--sans);
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--green);
-    line-height: 1;
-  }
-
+  .cards { display: grid; grid-template-columns: repeat(6,1fr); gap: 12px; margin-bottom: 20px; }
+  .card { background: var(--bg2); border: 1px solid var(--border); border-top: 2px solid var(--green-dim); padding: 16px; position: relative; overflow: hidden; }
+  .card::before { content:''; position:absolute; top:0; left:0; right:0; height:40px; background: linear-gradient(180deg,rgba(0,204,255,0.04) 0%,transparent 100%); }
+  .card-label { font-size: 9px; letter-spacing: 3px; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; }
+  .card-value { font-family: var(--sans); font-size: 32px; font-weight: 700; color: var(--green); line-height: 1; }
   .card-value.red { color: var(--red); }
   .card-value.amber { color: var(--amber); }
   .card-value.cyan { color: var(--cyan); }
+  .card-sub { font-size: 10px; color: var(--text-dim); margin-top: 6px; letter-spacing: 1px; }
 
-  .card-sub {
-    font-size: 10px;
-    color: var(--text-dim);
-    margin-top: 6px;
-    letter-spacing: 1px;
-  }
+  .mid { display: grid; grid-template-columns: 220px 1fr 280px; gap: 12px; margin-bottom: 20px; }
+  .panel { background: var(--bg2); border: 1px solid var(--border); padding: 16px; }
+  .panel-title { font-size: 9px; letter-spacing: 3px; color: var(--text-dim); margin-bottom: 16px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; }
+  .panel-title span { background: var(--green-dark); color: var(--green); padding: 2px 8px; font-size: 9px; letter-spacing: 1px; }
 
-  /* ── MIDDLE ROW ── */
-  .mid {
-    display: grid;
-    grid-template-columns: 220px 1fr 280px;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
+  .cal-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 3px; }
+  .cal-day-label { font-size: 8px; color: var(--text-muted); text-align: center; padding: 2px; letter-spacing: 1px; }
+  .cal-day { aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:9px; color:var(--text-muted); border:1px solid transparent; cursor:default; }
+  .cal-day.has-win   { background:var(--green-dark); border-color:var(--green-dim); color:var(--green); }
+  .cal-day.has-loss  { background:var(--red-dark);   border-color:var(--red);       color:var(--red); }
+  .cal-day.has-mixed { background:#1a1500;            border-color:var(--amber);     color:var(--amber); }
+  .cal-day.today     { border-color:var(--cyan);      color:var(--cyan); }
 
-  .panel {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    padding: 16px;
-  }
+  .log-wrap { background: var(--bg2); border: 1px solid var(--border); margin-bottom: 20px; }
+  .log-header { display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border); }
+  .log-title { font-size:9px; letter-spacing:3px; color:var(--text-dim); text-transform:uppercase; }
+  .log-count { background:var(--green-dark); color:var(--green); padding:2px 10px; font-size:9px; letter-spacing:2px; }
 
-  .panel-title {
-    font-size: 9px;
-    letter-spacing: 3px;
-    color: var(--text-dim);
-    margin-bottom: 16px;
-    text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  thead th { text-align:left; padding:10px 16px; font-size:9px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; border-bottom:1px solid var(--border); font-weight:400; }
+  tbody tr { border-bottom:1px solid var(--text-muted); transition:background 0.15s; }
+  tbody tr:hover { background:var(--bg3); }
+  tbody td { padding:10px 16px; color:var(--text); font-family:var(--mono); }
 
-  .panel-title span {
-    background: var(--green-dark);
-    color: var(--green);
-    padding: 2px 8px;
-    font-size: 9px;
-    letter-spacing: 1px;
-  }
+  .badge { display:inline-block; padding:2px 8px; font-size:10px; letter-spacing:1px; font-family:var(--sans); font-weight:600; }
+  .badge.win   { background:var(--green-dark); color:var(--green);  border:1px solid var(--green-dim); }
+  .badge.loss  { background:var(--red-dark);   color:var(--red);    border:1px solid var(--red); }
+  .badge.open  { background:#001a2a;            color:var(--cyan);   border:1px solid var(--cyan); }
+  .badge.be    { background:#001a2a;            color:#00ccff;       border:1px solid #00ccff; }
+  .badge.ghost { background:#1a1a1a;            color:#666;          border:1px solid #444; }
+  .badge.long  { background:#001a2a;            color:#2196F3;       border:1px solid #2196F3; }
+  .badge.short { background:#1a0010;            color:#ff2244;       border:1px solid #ff2244; }
+  .badge.sweep { background:#001233; color:#4fc3f7; border:1px solid #4fc3f7; }
+  .badge.bdl   { background:#001a0d; color:#00ff88; border:1px solid #00ff88; }
+  .badge.bds   { background:#1a0010; color:#ff6090; border:1px solid #ff6090; }
 
-  /* ── CALENDAR ── */
-  .cal-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 3px;
-  }
+  .pnl-pos  { color:var(--green); }
+  .pnl-neg  { color:var(--red); }
+  .pnl-open { color:var(--cyan); }
 
-  .cal-day-label {
-    font-size: 8px;
-    color: var(--text-muted);
-    text-align: center;
-    padding: 2px;
-    letter-spacing: 1px;
-  }
+  .empty-state { text-align:center; padding:60px; color:var(--text-muted); font-size:12px; letter-spacing:2px; }
+  .empty-state .big { font-size:32px; margin-bottom:12px; }
 
-  .cal-day {
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 9px;
-    color: var(--text-muted);
-    border: 1px solid transparent;
-    cursor: default;
-    position: relative;
-  }
+  .btn { background:var(--green-dark); border:1px solid var(--green-dim); color:var(--green); font-family:var(--mono); font-size:11px; padding:7px 20px; cursor:pointer; letter-spacing:2px; text-transform:uppercase; transition:all 0.15s; }
+  .btn:hover { background:var(--green); color:var(--bg); }
+  .btn.danger { background:var(--red-dark); border-color:var(--red); color:var(--red); }
+  .btn.danger:hover { background:var(--red); color:var(--bg); }
 
-  .cal-day.has-win {
-    background: var(--green-dark);
-    border-color: var(--green-dim);
-    color: var(--green);
-  }
+  .popup-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:100; align-items:center; justify-content:center; }
+  .popup-overlay.active { display:flex; }
+  .popup-box { background:var(--bg2); border:1px solid var(--border); border-top:2px solid var(--green-dim); padding:24px; max-width:900px; width:90%; position:relative; }
+  .popup-close { position:absolute; top:12px; right:16px; background:none; border:none; color:var(--text-dim); font-size:18px; cursor:pointer; font-family:var(--mono); }
+  .popup-close:hover { color:var(--green); }
+  .popup-title { font-family:var(--sans); font-size:16px; font-weight:600; color:var(--green); margin-bottom:4px; letter-spacing:2px; }
+  .popup-meta  { font-size:10px; color:var(--text-dim); letter-spacing:2px; margin-bottom:20px; }
+  .popup-screens { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+  .screen-box { background:var(--bg); border:1px solid var(--border); aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; overflow:hidden; position:relative; }
+  .screen-box img { width:100%; height:100%; object-fit:cover; cursor:zoom-in; }
+  .screen-label { position:absolute; top:8px; left:8px; font-size:8px; letter-spacing:2px; padding:2px 8px; background:var(--bg); border:1px solid var(--border); color:var(--text-dim); }
+  .screen-none { font-size:10px; color:var(--text-muted); letter-spacing:2px; }
+  .popup-stats { display:flex; gap:20px; flex-wrap:wrap; font-size:11px; }
+  .popup-stat { color:var(--text-dim); }
+  .popup-stat span { color:var(--green); }
+  .popup-stat span.red   { color:var(--red); }
+  .popup-stat span.amber { color:var(--amber); }
 
-  .cal-day.has-loss {
-    background: var(--red-dark);
-    border-color: var(--red);
-    color: var(--red);
-  }
+  .lightbox { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95); z-index:200; align-items:center; justify-content:center; cursor:zoom-out; }
+  .lightbox.active { display:flex; }
+  .lightbox img { max-width:92vw; max-height:92vh; object-fit:contain; border:1px solid var(--border); box-shadow:0 0 40px rgba(0,204,255,0.1); }
+  .lightbox-close { position:absolute; top:20px; right:24px; color:var(--text-dim); font-size:24px; cursor:pointer; font-family:var(--mono); background:none; border:none; }
+  .lightbox-close:hover { color:var(--green); }
 
-  .cal-day.has-mixed {
-    background: #1a1500;
-    border-color: var(--amber);
-    color: var(--amber);
-  }
+  .pill { font-family:var(--sans); font-size:11px; font-weight:600; letter-spacing:1px; padding:3px 12px; border:1px solid var(--border); background:transparent; color:var(--text-dim); cursor:pointer; transition:all 0.15s; text-transform:uppercase; }
+  .pill:hover { border-color:var(--green-dim); color:var(--text); }
+  .pill.active { background:var(--green-dark); border-color:var(--green-dim); color:var(--green); }
 
-  .cal-day.today {
-    border-color: var(--cyan);
-    color: var(--cyan);
-  }
+  .settings-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:100; align-items:center; justify-content:center; }
+  .settings-overlay.active { display:flex; }
+  .settings-box { background:var(--bg2); border:1px solid var(--border); border-top:2px solid var(--green-dim); padding:28px; width:520px; position:relative; }
+  .settings-close { position:absolute; top:12px; right:16px; background:none; border:none; color:var(--text-dim); font-size:18px; cursor:pointer; font-family:var(--mono); }
+  .settings-close:hover { color:var(--green); }
+  .settings-title { font-family:var(--sans); font-size:16px; font-weight:600; color:var(--green); letter-spacing:2px; margin-bottom:4px; }
+  .settings-sub { font-size:9px; color:var(--text-dim); letter-spacing:2px; margin-bottom:24px; }
+  .settings-group { margin-bottom:18px; }
+  .settings-label { font-size:9px; letter-spacing:2px; color:var(--text-dim); text-transform:uppercase; margin-bottom:6px; display:block; }
+  .settings-input { width:100%; background:var(--bg); border:1px solid var(--border); color:var(--green); font-family:var(--mono); font-size:12px; padding:8px 12px; outline:none; }
+  .settings-input:focus { border-color:var(--green-dim); }
+  .settings-input::placeholder { color:var(--text-muted); }
+  .settings-row { display:flex; gap:8px; margin-top:4px; }
+  .settings-status { font-size:10px; color:var(--text-dim); letter-spacing:1px; margin-top:8px; min-height:16px; }
+  .autotrading-toggle { display:flex; align-items:center; justify-content:space-between; padding:12px; background:var(--bg); border:1px solid var(--border); margin-bottom:16px; }
+  .toggle-label { font-size:11px; letter-spacing:2px; color:var(--text-dim); }
+  .toggle-switch { width:40px; height:20px; background:var(--border); border-radius:10px; cursor:pointer; position:relative; transition:background 0.2s; }
+  .toggle-switch.on { background:var(--green-dim); }
+  .toggle-switch::after { content:''; position:absolute; top:3px; left:3px; width:14px; height:14px; border-radius:50%; background:#fff; transition:left 0.2s; }
+  .toggle-switch.on::after { left:23px; }
+  .autotrading-status { font-size:9px; letter-spacing:2px; margin-top:4px; }
+  .autotrading-status.on { color:var(--green); }
+  .autotrading-status.off { color:var(--text-muted); }
 
-  /* ── TRADE LOG ── */
-  .log-wrap {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    margin-bottom: 20px;
-  }
-
-  .log-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .log-title {
-    font-size: 9px;
-    letter-spacing: 3px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-  }
-
-  .log-count {
-    background: var(--green-dark);
-    color: var(--green);
-    padding: 2px 10px;
-    font-size: 9px;
-    letter-spacing: 2px;
-  }
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 12px;
-  }
-
-  thead th {
-    text-align: left;
-    padding: 10px 16px;
-    font-size: 9px;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-    border-bottom: 1px solid var(--border);
-    font-weight: 400;
-  }
-
-  tbody tr {
-    border-bottom: 1px solid var(--text-muted);
-    transition: background 0.15s;
-  }
-
-  tbody tr:hover { background: var(--bg3); }
-
-  tbody td {
-    padding: 12px 16px;
-    color: var(--text);
-    font-family: var(--mono);
-  }
-
-  .badge {
-    display: inline-block;
-    padding: 2px 8px;
-    font-size: 10px;
-    letter-spacing: 1px;
-    font-family: var(--sans);
-    font-weight: 600;
-  }
-
-  .badge.win { background: #003310; color: #00ff41; border: 1px solid #00c032; }
-  .badge.loss { background: var(--red-dark); color: var(--red); border: 1px solid var(--red); }
-  .badge.open { background: #001a2a; color: var(--cyan); border: 1px solid var(--cyan); }
-  .badge.be { background: #001a2a; color: #00ccff; border: 1px solid #00ccff; }
-  .badge.ghost { background: #1a1a1a; color: #666; border: 1px solid #444; }
-  .badge.long { background: #001a2a; color: #2196F3; border: 1px solid #2196F3; }
-  .badge.short { background: #1a0010; color: #ff2244; border: 1px solid #ff2244; }
-
-  .pnl-pos { color: var(--green); }
-  .pnl-neg { color: var(--red); }
-  .pnl-open { color: var(--cyan); }
-
-  .empty-state {
-    text-align: center;
-    padding: 60px;
-    color: var(--text-muted);
-    font-size: 12px;
-    letter-spacing: 2px;
-  }
-
-  .empty-state .big { font-size: 32px; margin-bottom: 12px; }
-
-  /* ── MANUAL ADD ── */
-  .add-form {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-top: 2px solid var(--text-dim);
-    padding: 16px;
-    margin-bottom: 20px;
-  }
-
-  .add-form-title {
-    font-size: 9px;
-    letter-spacing: 3px;
-    color: var(--text-dim);
-    margin-bottom: 14px;
-    text-transform: uppercase;
-  }
-
-  .form-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: flex-end;
-  }
-
-  .form-group {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .form-group label {
-    font-size: 8px;
-    letter-spacing: 2px;
-    color: var(--text-dim);
-    text-transform: uppercase;
-  }
-
-  .form-group input, .form-group select {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--green);
-    font-family: var(--mono);
-    font-size: 12px;
-    padding: 6px 10px;
-    outline: none;
-    width: 120px;
-  }
-
-  .form-group input:focus, .form-group select:focus {
-    border-color: var(--green-dim);
-  }
-
-  .form-group select option { background: var(--bg); }
-
-  .btn {
-    background: var(--green-dark);
-    border: 1px solid var(--green-dim);
-    color: var(--green);
-    font-family: var(--mono);
-    font-size: 11px;
-    padding: 7px 20px;
-    cursor: pointer;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    transition: all 0.15s;
-  }
-
-  .btn:hover {
-    background: var(--green);
-    color: var(--bg);
-  }
-
-  .btn.danger {
-    background: var(--red-dark);
-    border-color: var(--red);
-    color: var(--red);
-  }
-
-  .btn.danger:hover {
-    background: var(--red);
-    color: var(--bg);
-  }
-
-
-  /* ── POPUP ── */
-  .popup-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-  }
-  .popup-overlay.active { display: flex; }
-  .popup-box {
-    background: var(--bg2);
-    border: 1px solid var(--border);
-    border-top: 2px solid var(--green-dim);
-    padding: 24px;
-    max-width: 900px;
-    width: 90%;
-    position: relative;
-  }
-  .popup-close {
-    position: absolute;
-    top: 12px; right: 16px;
-    background: none;
-    border: none;
-    color: var(--text-dim);
-    font-size: 18px;
-    cursor: pointer;
-    font-family: var(--mono);
-  }
-  .popup-close:hover { color: var(--green); }
-  .popup-title {
-    font-family: var(--sans);
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--green);
-    margin-bottom: 4px;
-    letter-spacing: 2px;
-  }
-  .popup-meta {
-    font-size: 10px;
-    color: var(--text-dim);
-    letter-spacing: 2px;
-    margin-bottom: 20px;
-  }
-  .popup-screens {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-  .screen-box {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    aspect-ratio: 16/9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    position: relative;
-  }
-  .screen-box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .screen-label {
-    position: absolute;
-    top: 8px; left: 8px;
-    font-size: 8px;
-    letter-spacing: 2px;
-    padding: 2px 8px;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text-dim);
-  }
-  .screen-none {
-    font-size: 10px;
-    color: var(--text-muted);
-    letter-spacing: 2px;
-  }
-  .popup-stats {
-    display: flex;
-    gap: 20px;
-    font-size: 11px;
-  }
-  .popup-stat { color: var(--text-dim); }
-  .popup-stat span { color: var(--green); }
-  .popup-stat span.red { color: var(--red); }
-  .popup-stat span.amber { color: var(--amber); }
-
-
-  .uptime {
-    text-align: center;
-    margin-top: 12px;
-    font-size: 10px;
-    letter-spacing: 3px;
-    color: var(--text-dim);
-  }
-  .uptime span {
-    color: var(--green);
-    font-family: var(--sans);
-    font-size: 13px;
-    font-weight: 600;
-  }
-
-
-  /* ── LIGHTBOX ── */
-  .lightbox {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.95);
-    z-index: 200;
-    align-items: center;
-    justify-content: center;
-    cursor: zoom-out;
-  }
-  .lightbox.active { display: flex; }
-  .lightbox img {
-    max-width: 92vw;
-    max-height: 92vh;
-    object-fit: contain;
-    border: 1px solid var(--border);
-    box-shadow: 0 0 40px rgba(0,255,65,0.1);
-  }
-  .lightbox-close {
-    position: absolute;
-    top: 20px; right: 24px;
-    color: var(--text-dim);
-    font-size: 24px;
-    cursor: pointer;
-    font-family: var(--mono);
-    background: none;
-    border: none;
-  }
-  .lightbox-close:hover { color: var(--green); }
-  .screen-box img { cursor: zoom-in; }
-
-  /* scrollbar */
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); }
+  ::-webkit-scrollbar { width:4px; }
+  ::-webkit-scrollbar-track { background:var(--bg); }
+  ::-webkit-scrollbar-thumb { background:var(--border); }
 </style>
 </head>
 <body>
@@ -580,11 +166,11 @@
   <header>
     <div class="logo">ALA <span>//</span> MNQ</div>
     <div class="header-right">
-      <a class="nav-link" href="ala-hermes.html">HERMES ANALYSIS →</a>
       <div class="status">
         <div class="dot"></div>
         <span id="last-sync">SYNCING...</span>
       </div>
+      <button class="btn" onclick="openSettings()" style="padding:5px 14px;font-size:10px">⚙ SETTINGS</button>
     </div>
   </header>
 
@@ -624,41 +210,54 @@
 
   <!-- MID ROW -->
   <div class="mid">
-
-    <!-- DONUT -->
+    <!-- Results donut with LONG/SHORT filter -->
     <div class="panel">
       <div class="panel-title">Results <span id="donut-label">—</span></div>
       <canvas id="donut" height="140"></canvas>
       <div id="donut-legend" style="margin-top:10px;display:flex;flex-direction:column;gap:4px"></div>
+      <div style="border-top:1px solid var(--border);margin-top:14px;padding-top:12px;display:flex;flex-direction:column;align-items:center;gap:8px;">
+        <div style="font-size:9px;letter-spacing:3px;color:var(--text-dim);">BIAS</div>
+        <div style="display:flex;gap:6px;">
+          <button id="bias-btn-ALL"   class="pill active" onclick="setBiasFilter(null)">ALL</button>
+          <button id="bias-btn-LONG"  class="pill"        onclick="setBiasFilter('LONG')">LONG</button>
+          <button id="bias-btn-SHORT" class="pill"        onclick="setBiasFilter('SHORT')">SHORT</button>
+        </div>
+      </div>
     </div>
 
-    <!-- PNL CHART -->
+    <!-- Cumulative PnL (updates with filter) -->
     <div class="panel">
       <div class="panel-title">Cumulative PnL <span id="pnl-total-label">$0</span></div>
       <canvas id="pnlchart" height="160"></canvas>
     </div>
 
-    <!-- CALENDAR -->
+    <!-- Calendar + uptime -->
     <div class="panel" style="display:flex;flex-direction:column;">
       <div class="panel-title">Calendar <span id="cal-month">—</span></div>
       <div class="cal-grid" id="cal-labels"></div>
       <div class="cal-grid" id="cal-grid"></div>
-      <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-top:1px solid #1a2e1a;margin-top:14px;padding-top:12px;text-align:center;font-size:9px;letter-spacing:2px;color:#00698a;">SYSTEM UPTIME<br><span id="uptime-counter" style="color:#00b4d8;font-family:Rajdhani,sans-serif;font-size:18px;font-weight:700;margin-top:4px;display:block;">—</span><span style="font-size:8px;color:#002a3a;letter-spacing:2px;margin-top:4px;display:block;">SINCE JUN 07 2026</span></div>
-          </div>
-
+      <div ondblclick="openSettings()" style="cursor:pointer;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-top:1px solid var(--border);margin-top:14px;padding-top:12px;text-align:center;font-size:9px;letter-spacing:2px;color:var(--text-dim);">
+        PHASE 2 UPTIME<br>
+        <span id="uptime-counter" style="color:var(--green);font-family:Rajdhani,sans-serif;font-size:18px;font-weight:700;margin-top:4px;display:block;">—</span>
+        <span id="phase2-date" style="font-size:8px;color:var(--text-muted);letter-spacing:2px;margin-top:4px;display:block;">SINCE JUL 15 2026</span>
+        <div id="autotrading-pill" style="margin-top:8px;padding:2px 12px;border-radius:2px;font-size:9px;letter-spacing:2px;border:1px solid var(--border);color:var(--text-muted);">AUTOTRADING OFF</div>
+      </div>
+    </div>
   </div>
 
   <!-- TRADE LOG -->
   <div class="log-wrap">
     <div class="log-header">
       <div class="log-title">// Trade Log</div>
-      <div class="log-count" id="trade-count">0 trades</div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <div class="log-count" id="trade-count">0 trades</div>
+      </div>
     </div>
     <table>
       <thead>
         <tr>
           <th>Date</th>
-          <th>Session</th>
+          <th>Setup</th>
           <th>Bias</th>
           <th>Entry</th>
           <th>Stop</th>
@@ -678,46 +277,52 @@
     </div>
   </div>
 
+</div>
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────────────────────────
-const VPS_URL = 'https://ala-mnq-vps-production.up.railway.app';
-const DEFAULT_RISK = 300; // fallback if risk not in payload
+const VPS_URL      = 'https://ala-mnq-vps-production.up.railway.app';
+const DEFAULT_RISK = 200;
 
 // ── MATRIX ───────────────────────────────────────────────────────────────────
 const canvas = document.getElementById('matrix');
 const ctx    = canvas.getContext('2d');
 canvas.width  = window.innerWidth;
 canvas.height = window.innerHeight;
-
-const cols = Math.floor(canvas.width / 14);
+const cols  = Math.floor(canvas.width / 14);
 const drops = Array(cols).fill(1);
-const chars  = 'ALAMNQFUTURESBREAKOUTLONGNASDAQ0123456789$⚡';
-
+const chars = 'ALAMNQ1LONGSHORTSWEEPBD0123456789$₿CONFLUX';
 function drawMatrix() {
-  ctx.fillStyle = 'rgba(5,10,5,0.05)';
+  ctx.fillStyle = 'rgba(5,10,15,0.05)';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.fillStyle = '#00b4d8';
+  ctx.fillStyle = '#00ccff';
   ctx.font = '12px Share Tech Mono';
   drops.forEach((y, i) => {
-    const char = chars[Math.floor(Math.random() * chars.length)];
-    ctx.fillText(char, i * 14, y * 14);
-    if (y * 14 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    ctx.fillText(chars[Math.floor(Math.random()*chars.length)], i*14, y*14);
+    if (y*14 > canvas.height && Math.random() > 0.975) drops[i] = 0;
     drops[i]++;
   });
 }
 setInterval(drawMatrix, 50);
 
-// ── STORAGE (localStorage as fallback) ───────────────────────────────────────
+// ── STORAGE ───────────────────────────────────────────────────────────────────
 function getTrades() {
-  try { return JSON.parse(localStorage.getItem('ala_trades') || '[]'); } catch { return []; }
+  try { return JSON.parse(localStorage.getItem('ala_mnq_trades') || '[]'); } catch { return []; }
+}
+function saveTrades(t) { localStorage.setItem('ala_mnq_trades', JSON.stringify(t)); }
+
+// ── SETUP HELPERS ─────────────────────────────────────────────────────────────
+function setupBadge(s) {
+  if (!s) return '<span class="badge sweep">—</span>';
+  const t = s.toUpperCase();
+  if (t.includes('BD_LONG')  || t === 'BD L') return '<span class="badge bdl">BD L</span>';
+  if (t.includes('BD_SHORT') || t === 'BD S') return '<span class="badge bds">BD S</span>';
+  if (t === 'LONG')  return '<span class="badge sweep">SWEEP L</span>';
+  if (t === 'SHORT') return '<span class="badge sweep">SWEEP S</span>';
+  return `<span class="badge sweep">${s}</span>`;
 }
 
-function saveTrades(trades) {
-  localStorage.setItem('ala_trades', JSON.stringify(trades));
-}
-
-// ── MATH ─────────────────────────────────────────────────────────────────────
+// ── MATH ──────────────────────────────────────────────────────────────────────
 function calcRR(entry, sl, tp) {
   entry = parseFloat(entry); sl = parseFloat(sl); tp = parseFloat(tp);
   if (!entry || !sl || !tp) return null;
@@ -725,241 +330,178 @@ function calcRR(entry, sl, tp) {
   const reward = Math.abs(tp - entry);
   return risk > 0 ? (reward / risk).toFixed(2) : null;
 }
-
-// ── PNL CONFIG ────────────────────────────────────────────────────────────────
-// Swap out this function to change how PnL is calculated per strategy.
-// Current: assumes partials at 1R (half size), full TP at originalRR
-//   WIN  = (risk/2 × 1R) + (risk/2 × originalRR)
-//   BE   = risk/2 (only partial secured)
-//   LOSS = -risk (full stop, no partial)
-// To change: edit the formulas below. risk = dollar risk, rr = signal R:R ratio.
-// ──────────────────────────────────────────────────────────────────────────────
 function calcPnl(result, rr, risk) {
   const R      = parseFloat(risk) || DEFAULT_RISK;
-  const halfR  = R / 2;
-  const fullRR = parseFloat(rr) || 1;
-  if (result === 'WIN')  return +(R * fullRR).toFixed(0);
-  if (result === 'LOSS') return -R;
-  if (result === 'PARTIAL')   return +halfR.toFixed(0);
+  const fullRR = parseFloat(rr)   || 1;
+  if (result === 'WIN')     return +(R * fullRR).toFixed(0);
+  if (result === 'LOSS')    return -R;
+  if (result === 'PARTIAL') return +(R / 2).toFixed(0);
   return null;
 }
+function effectiveRR(pnl, risk) {
+  const R = parseFloat(risk) || DEFAULT_RISK;
+  return (pnl === null || pnl === undefined) ? null : (pnl / R).toFixed(2);
+}
 
-// ── RENDER ───────────────────────────────────────────────────────────────────
-let donutChart = null;
-let pnlChart   = null;
-
-
-// ── RESULT FILTER ────────────────────────────────────────────────────────────
+// ── FILTER STATE ──────────────────────────────────────────────────────────────
+let currentBiasFilter   = null;
 let currentResultFilter = null;
 
+function setBiasFilter(v) {
+  currentBiasFilter = v;
+  document.querySelectorAll('[id^="bias-btn-"]').forEach(el => {
+    el.classList.toggle('active', el.id === 'bias-btn-' + (v || 'ALL'));
+  });
+  render();
+}
 function setResultFilter(result) {
   currentResultFilter = currentResultFilter === result ? null : result;
   render();
 }
 
-// Effective R:R shown in table = actual PnL / risk (always accurate regardless of partials)
-function effectiveRR(pnl, risk) {
-  const R = parseFloat(risk) || DEFAULT_RISK;
-  if (pnl === null || pnl === undefined) return null;
-  return (pnl / R).toFixed(2);
-}
+// ── RENDER ────────────────────────────────────────────────────────────────────
+let donutChart = null;
+let pnlChart   = null;
 
 function render() {
-  let trades = getTrades();
-  const allTrades = trades;
+  const allTrades = getTrades();
+  let trades = [...allTrades];
   if (currentResultFilter) trades = trades.filter(t => t.result === currentResultFilter);
-  const closed = allTrades.filter(t => t.result === 'WIN' || t.result === 'LOSS' || t.result === 'PARTIAL');
-  const wins   = closed.filter(t => t.result === 'WIN');
-  const losses = closed.filter(t => t.result === 'LOSS');
-  const open   = allTrades.filter(t => t.result === 'OPEN');
+  if (currentBiasFilter)   trades = trades.filter(t => (t.direction || t.type || '').toUpperCase().includes(currentBiasFilter));
 
-  // Stats
-  document.getElementById('stat-total').textContent     = trades.length;
-  document.getElementById('stat-breakdown').textContent = `${wins.length}W · ${losses.length}L · ${open.length} open`;
+  const closed    = allTrades.filter(t => ['WIN','LOSS','PARTIAL','BE'].includes(t.result));
+  const pureWins  = closed.filter(t => t.result === 'WIN');
+  const bes       = closed.filter(t => t.result === 'PARTIAL' || t.result === 'BE');
+  const losses    = closed.filter(t => t.result === 'LOSS');
+  const wins      = closed.filter(t => t.result === 'WIN' || t.result === 'PARTIAL' || t.result === 'BE');
+  const open      = allTrades.filter(t => t.result === 'OPEN');
 
-  const wr = closed.length ? ((wins.length / closed.length) * 100).toFixed(1) + '%' : '—';
+  // Filtered closed for PnL chart
+  let filteredClosed = trades.filter(t => ['WIN','LOSS','PARTIAL','BE'].includes(t.result));
+
+  // Stats (always from all trades)
+  document.getElementById('stat-total').textContent     = allTrades.length;
+  document.getElementById('stat-breakdown').textContent = `${pureWins.length}W · ${bes.length}BE · ${losses.length}L · ${open.length} open`;
+
+  const wr = closed.length ? ((wins.length/closed.length)*100).toFixed(1)+'%' : '—';
   document.getElementById('stat-winrate').textContent = wr;
-  document.getElementById('stat-winrate').className   = 'card-value ' + (wins.length > losses.length ? '' : 'red');
+  document.getElementById('stat-winrate').className   = 'card-value ' + (wins.length >= losses.length ? '' : 'red');
 
-  const rrs  = closed.filter(t => t.rr).map(t => parseFloat(t.rr));
-  const avgRR = rrs.length ? (rrs.reduce((a,b)=>a+b,0)/rrs.length).toFixed(2) + ':1' : '—';
+  const rrs   = closed.filter(t=>t.rr).map(t=>parseFloat(t.rr));
+  const avgRR = rrs.length ? (rrs.reduce((a,b)=>a+b,0)/rrs.length).toFixed(2)+':1' : '—';
   document.getElementById('stat-rr').textContent = avgRR;
 
-  const totalPnl = closed.reduce((sum, t) => sum + (t.pnl || 0), 0);
+  const totalPnl = closed.reduce((s,t)=>s+(t.pnl||0),0);
   const pnlEl    = document.getElementById('stat-pnl');
-  pnlEl.textContent = (totalPnl >= 0 ? '+' : '') + '$' + totalPnl;
-  pnlEl.className   = 'card-value ' + (totalPnl >= 0 ? '' : 'red');
+  pnlEl.textContent = (totalPnl>=0?'+':'')+'$'+totalPnl;
+  pnlEl.className   = 'card-value '+(totalPnl>=0?'':'red');
 
-  const pnls = closed.map(t => t.pnl || 0);
+  const pnls  = closed.map(t=>t.pnl||0);
   const best  = pnls.length ? Math.max(...pnls) : null;
   const worst = pnls.length ? Math.min(...pnls) : null;
+  const bestT = closed.find(t=>t.pnl===best);
+  const worstT= closed.find(t=>t.pnl===worst);
+  document.getElementById('stat-best').textContent       = best!==null  ? '+$'+best  : '—';
+  document.getElementById('stat-worst').textContent      = worst!==null ? (worst<0?'-$'+Math.abs(worst):'+$'+worst) : '—';
+  document.getElementById('stat-best-date').textContent  = bestT  ? bestT.date  : '—';
+  document.getElementById('stat-worst-date').textContent = worstT ? worstT.date : '—';
 
-  document.getElementById('stat-best').textContent  = best  !== null ? '+$' + best  : '—';
-  document.getElementById('stat-worst').textContent = worst !== null ? (worst < 0 ? '-$' + Math.abs(worst) : '+$' + worst) : '—';
-
-  const bestTrade  = closed.find(t => t.pnl === best);
-  const worstTrade = closed.find(t => t.pnl === worst);
-  document.getElementById('stat-best-date').textContent  = bestTrade  ? bestTrade.date  : '—';
-  document.getElementById('stat-worst-date').textContent = worstTrade ? worstTrade.date : '—';
-
-  // Donut
-  document.getElementById('donut-label').textContent = closed.length ? wins.length + 'W / ' + losses.length + 'L' : '—';
-  // Interactive donut
-  const bes        = closed.filter(t => t.result === 'PARTIAL');
-  const donutData   = [wins.length, losses.length, bes.length];
-  const donutKeys   = ['WIN', 'LOSS', 'PARTIAL'];
-  const donutLabels = ['Win', 'Loss', 'PARTIAL'];
-  const donutColors = ['#00ff41', '#ff2244', '#00ccff'];
-
-  // Legend with click filter
-  document.getElementById('donut-label').textContent = closed.length ? wins.length + 'W / ' + losses.length + 'L' : '—';
-  document.getElementById('donut-legend').innerHTML = donutLabels.map((l, i) => donutData[i] > 0 ? `
-    <div onclick="setResultFilter('${donutKeys[i]}')" id="legend-${donutKeys[i]}"
-      style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:3px 6px;border-radius:4px;transition:background 0.15s;"
-      onmouseover="this.style.background='${donutColors[i]}18'"
-      onmouseout="this.style.background=currentResultFilter==='${donutKeys[i]}'?'${donutColors[i]}22':'transparent'">
-      <div style="width:7px;height:7px;border-radius:50%;background:${donutColors[i]};flex-shrink:0"></div>
+  // Donut (filtered by bias)
+  const filteredForDonut = currentBiasFilter
+    ? closed.filter(t => (t.direction||t.type||'').toUpperCase().includes(currentBiasFilter))
+    : closed;
+  const dWins   = filteredForDonut.filter(t=>t.result==='WIN').length;
+  const dLosses = filteredForDonut.filter(t=>t.result==='LOSS').length;
+  const dBE     = filteredForDonut.filter(t=>t.result==='PARTIAL'||t.result==='BE').length;
+  const donutData = [dWins, dLosses, dBE];
+  const donutKeys = ['WIN','LOSS','PARTIAL'];
+  const donutLbls = ['Win','Loss','BE'];
+  const donutClrs = ['#00ccff','#ff2244','#00ffcc'];
+  document.getElementById('donut-label').textContent = filteredForDonut.length ? dWins+'W / '+dLosses+'L' : '—';
+  document.getElementById('donut-legend').innerHTML = donutLbls.map((l,i) => donutData[i]>0 ? `
+    <div onclick="setResultFilter('${donutKeys[i]}')" style="display:flex;align-items:center;gap:8px;cursor:pointer;padding:3px 6px;transition:background 0.15s;"
+      onmouseover="this.style.background='${donutClrs[i]}18'"
+      onmouseout="this.style.background=currentResultFilter==='${donutKeys[i]}'?'${donutClrs[i]}22':'transparent'">
+      <div style="width:7px;height:7px;border-radius:50%;background:${donutClrs[i]};flex-shrink:0"></div>
       <span style="color:var(--text-dim);flex:1;font-size:10px;letter-spacing:1px;">${l}</span>
-      <span style="font-size:11px;color:${donutColors[i]};font-weight:600">${donutData[i]}</span>
+      <span style="font-size:11px;color:${donutClrs[i]};font-weight:600">${donutData[i]}</span>
     </div>` : '').join('');
-
   if (donutChart) donutChart.destroy();
-  const donutCtx = document.getElementById('donut').getContext('2d');
-  donutChart = new Chart(donutCtx, {
+  donutChart = new Chart(document.getElementById('donut').getContext('2d'), {
     type: 'doughnut',
-    data: {
-      labels: donutLabels,
-      datasets: [{
-        data: donutData.map(d => d || 0.001),
-        backgroundColor: donutColors.map((c, i) => currentResultFilter === donutKeys[i] ? c : c + '99'),
-        borderColor: '#050a05',
-        borderWidth: 3,
-        borderRadius: currentResultFilter ? 2 : 0,
-      }]
-    },
-    options: {
-      cutout: '70%',
-      responsive: true,
-      maintainAspectRatio: true,
-      plugins: { legend: { display: false }, tooltip: { enabled: false } },
-      animation: { duration: 400 },
-      onClick(_, elements) {
-        if (!elements.length) return;
-        const i = elements[0].index;
-        if (donutData[i] > 0) setResultFilter(donutKeys[i]);
-      }
-    }
+    data: { labels: donutLbls, datasets: [{ data: donutData.map(d=>d||0.001), backgroundColor: donutClrs.map((c,i)=>currentResultFilter===donutKeys[i]?c:c+'99'), borderColor:'#050a0f', borderWidth:3 }] },
+    options: { cutout:'70%', responsive:true, maintainAspectRatio:true, plugins:{legend:{display:false},tooltip:{enabled:false}}, animation:{duration:400},
+      onClick(_,els){ if(els.length&&donutData[els[0].index]>0) setResultFilter(donutKeys[els[0].index]); } }
   });
 
-  // PnL chart
-  document.getElementById('pnl-total-label').textContent = (totalPnl >= 0 ? '+' : '') + '$' + totalPnl;
+  // PnL chart — updates with bias filter
+  const filteredPnl = filteredClosed.reduce((s,t)=>s+(t.pnl||0),0);
+  document.getElementById('pnl-total-label').textContent = (filteredPnl>=0?'+':'')+'$'+filteredPnl;
   if (pnlChart) pnlChart.destroy();
-  const pnlCtx = document.getElementById('pnlchart').getContext('2d');
   let running = 0;
-  const pnlLabels = ['Start', ...closed.map(t => t.date || '—')];
-  running = 0;
-  const pnlValuesFixed = [0, ...closed.map(t => { running += (t.pnl || 0); return running; })];
-  pnlChart = new Chart(pnlCtx, {
-    type: 'line',
-    data: {
-      labels: pnlLabels,
-      datasets: [{
-        data: pnlValuesFixed,
-        borderColor: totalPnl >= 0 ? '#00b4d8' : '#ff2244',
-        borderWidth: 2,
-        pointBackgroundColor: totalPnl >= 0 ? '#00b4d8' : '#ff2244',
-        pointRadius: 4,
-        fill: true,
-        backgroundColor: totalPnl >= 0 ? 'rgba(0,255,65,0.06)' : 'rgba(255,34,68,0.06)',
-        tension: 0.3,
-      }]
-    },
-    options: {
-      scales: {
-        x: {
-          display: true,
-          ticks: {
-            color: '#00698a',
-            font: { family: 'Share Tech Mono', size: 9 },
-            maxRotation: 45,
-            maxTicksLimit: 8,
-          },
-          grid: { display: false },
-          border: { color: '#1a2e1a' }
-        },
-        y: {
-          ticks: { color: '#00698a', font: { family: 'Share Tech Mono', size: 10 },
-                   callback: v => '$' + v },
-          grid: { color: '#0d150d' },
-          border: { color: '#1a2e1a' }
-        }
-      },
-      plugins: { legend: { display: false }, tooltip: {
-        callbacks: { label: ctx => '$' + ctx.parsed.y }
-      }},
-      animation: { duration: 600 }
-    }
+  const pnlLabels = ['Start',...filteredClosed.map(t=>t.date||'—')];
+  const pnlValues = [0,...filteredClosed.map(t=>{ running+=(t.pnl||0); return running; })];
+  pnlChart = new Chart(document.getElementById('pnlchart').getContext('2d'), {
+    type:'line',
+    data:{ labels:pnlLabels, datasets:[{ data:pnlValues, borderColor:filteredPnl>=0?'#00ccff':'#ff2244', borderWidth:2, pointBackgroundColor:filteredPnl>=0?'#00ccff':'#ff2244', pointRadius:4, fill:true, backgroundColor:filteredPnl>=0?'rgba(0,204,255,0.06)':'rgba(255,34,68,0.06)', tension:0.3 }] },
+    options:{ scales:{ x:{ display:true, ticks:{color:'#3a6e9e',font:{family:'Share Tech Mono',size:9},maxRotation:45,maxTicksLimit:8}, grid:{display:false}, border:{color:'#1a2e4a'} }, y:{ ticks:{color:'#3a6e9e',font:{family:'Share Tech Mono',size:10},callback:v=>'$'+v}, grid:{color:'#0d1520'}, border:{color:'#1a2e4a'} } }, plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'$'+ctx.parsed.y}}}, animation:{duration:600} }
   });
 
   // Calendar
-  renderCalendar(trades);
+  renderCalendar(allTrades);
 
   // Table
   const tbody = document.getElementById('trade-tbody');
   const empty = document.getElementById('empty-state');
-  document.getElementById('trade-count').textContent = trades.length + ' trades';
-
+  document.getElementById('trade-count').textContent = trades.length+' trades';
   if (trades.length === 0) {
     tbody.innerHTML = '';
     empty.style.display = 'block';
   } else {
     empty.style.display = 'none';
     tbody.innerHTML = [...trades].reverse().map((t, ri) => {
-      const i = trades.length - 1 - ri;
-      const result = t.result || 'OPEN';
-      const pnlStr = t.pnl !== null && t.pnl !== undefined
-        ? (t.pnl >= 0 ? '+$' + t.pnl : '-$' + Math.abs(t.pnl))
-        : '—';
-      const pnlClass = result === 'WIN' ? 'pnl-pos' : result === 'LOSS' ? 'pnl-neg' : 'pnl-open';
-      const badgeClass = t.orphan ? 'ghost' : result === 'WIN' ? 'win' : result === 'LOSS' ? 'loss' : result === 'PARTIAL' ? 'be' : 'open';
-      const badgeLabel = t.orphan ? 'GHOST' : result;
-      const biasClass = t.direction === 'SHORT' ? 'short' : 'long';
-      const biasLabel = t.direction || 'LONG';
-      return `<tr ondblclick="openPopupByIndex(${trades.length - 1 - ri})" style="cursor:pointer">
-        <td>${t.date || '—'}</td>
-        <td>${t.session || '—'}</td>
+      const i        = trades.length - 1 - ri;
+      const result   = t.result || 'OPEN';
+      const pnlStr   = t.pnl!==null && t.pnl!==undefined ? (t.pnl>=0?'+$'+t.pnl:'-$'+Math.abs(t.pnl)) : '—';
+      const pnlClass = result==='WIN'?'pnl-pos':result==='LOSS'?'pnl-neg':'pnl-open';
+      const badgeCls = t.orphan?'ghost':result==='WIN'?'win':result==='LOSS'?'loss':(result==='PARTIAL'||result==='BE')?'be':'open';
+      const dir      = (t.direction||t.type||'LONG').toUpperCase();
+      const biasClass= dir.includes('SHORT')?'short':'long';
+      const biasLabel= dir.includes('SHORT')?'SHORT':'LONG';
+      const rrDisplay= t.pnl!==null && t.pnl!==undefined && t.risk
+        ? effectiveRR(t.pnl, t.risk)+':1'
+        : t.rr ? (parseFloat(t.rr)%1===0?parseInt(t.rr):parseFloat(t.rr).toFixed(1))+':1' : '—';
+      return `<tr ondblclick="openPopupByIndex(${i})" style="cursor:pointer">
+        <td>${t.date||'—'}</td>
+        <td>${setupBadge(t.type||t.setup)}</td>
         <td><span class="badge ${biasClass}">${biasLabel}</span></td>
-        <td>${t.entry || '—'}</td>
-        <td style="color:var(--red)">${t.sl || '—'}</td>
-        <td style="color:var(--text)">${t.tp || '—'}</td>
-        <td>${t.exit || '—'}</td>
-        <td style="color:var(--amber)">${t.pnl !== null && t.pnl !== undefined && t.risk ? effectiveRR(t.pnl, t.risk) + ':1' : t.rr ? (parseFloat(t.rr) % 1 === 0 ? parseInt(t.rr) : parseFloat(t.rr).toFixed(1)) + ':1' : '—'}</td>
-        <td><span class="badge ${badgeClass}">${result}</span></td>
+        <td>${t.entry||'—'}</td>
+        <td style="color:var(--red)">${t.sl||'—'}</td>
+        <td style="color:var(--amber)">${t.tp||'—'}</td>
+        <td>${t.exit||'—'}</td>
+        <td style="color:var(--amber)">${rrDisplay}</td>
+        <td><span class="badge ${badgeCls}">${t.orphan?'GHOST':result}</span></td>
         <td class="${pnlClass}">${pnlStr}</td>
-        <td><button class="btn danger" style="padding:3px 10px;font-size:9px" onclick="deleteTrade(${i})">✕</button></td>
+        <td><button class="btn danger" style="padding:3px 10px;font-size:9px" onclick="deleteTrade(${i},event)">✕</button></td>
       </tr>`;
     }).join('');
   }
 
-  document.getElementById('last-sync').textContent = 'UPDATED ' + new Date().toLocaleTimeString();
+  document.getElementById('last-sync').textContent = 'UPDATED '+new Date().toLocaleTimeString();
+  updateAutotradingPill();
 }
 
+// ── CALENDAR ──────────────────────────────────────────────────────────────────
 function renderCalendar(trades) {
   const now   = new Date();
   const year  = now.getFullYear();
   const month = now.getMonth();
-
-  document.getElementById('cal-month').textContent =
-    now.toLocaleString('default', { month: 'short' }).toUpperCase() + ' ' + year;
-
+  document.getElementById('cal-month').textContent = now.toLocaleString('default',{month:'short'}).toUpperCase()+' '+year;
   const labels = ['SU','MO','TU','WE','TH','FR','SA'];
-  document.getElementById('cal-labels').innerHTML =
-    labels.map(l => `<div class="cal-day-label">${l}</div>`).join('');
-
-  const first   = new Date(year, month, 1).getDay();
-  const daysIn  = new Date(year, month + 1, 0).getDate();
-  const today   = now.getDate();
-
+  document.getElementById('cal-labels').innerHTML = labels.map(l=>`<div class="cal-day-label">${l}</div>`).join('');
+  const first  = new Date(year,month,1).getDay();
+  const daysIn = new Date(year,month+1,0).getDate();
+  const today  = now.getDate();
   const byDate = {};
   trades.forEach(t => {
     if (!t.date) return;
@@ -967,161 +509,173 @@ function renderCalendar(trades) {
     if (!byDate[d]) byDate[d] = [];
     byDate[d].push(t);
   });
-
   let cells = Array(first).fill(null);
-  for (let d = 1; d <= daysIn; d++) cells.push(d);
-
+  for (let d=1;d<=daysIn;d++) cells.push(d);
   document.getElementById('cal-grid').innerHTML = cells.map(d => {
     if (!d) return `<div class="cal-day"></div>`;
     const key   = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const dayTs = byDate[key] || [];
-    const wins  = dayTs.filter(t => t.result === 'WIN').length;
-    const losses= dayTs.filter(t => t.result === 'LOSS').length;
-    let cls = d === today ? 'today' : '';
-    if (wins && losses) cls += ' has-mixed';
-    else if (wins)      cls += ' has-win';
-    else if (losses)    cls += ' has-loss';
+    const dayTs = byDate[key]||[];
+    const wins  = dayTs.filter(t=>t.result==='WIN').length;
+    const losses= dayTs.filter(t=>t.result==='LOSS').length;
+    let cls = d===today?'today':'';
+    if (wins&&losses) cls+=' has-mixed';
+    else if (wins)    cls+=' has-win';
+    else if (losses)  cls+=' has-loss';
     return `<div class="cal-day ${cls}" title="${wins}W ${losses}L">${d}</div>`;
   }).join('');
 }
 
-async function deleteTrade(i) {
-  // Delete from server first
-  try {
-    await fetch(VPS_URL + '/trades/' + i, { method: 'DELETE' });
-  } catch (err) {
-    console.error('Server delete failed:', err);
-  }
-  // Then remove from localStorage
-  let trades = getTrades();
-  const allTrades = trades;
-  if (currentResultFilter) trades = trades.filter(t => t.result === currentResultFilter);
-  trades.splice(i, 1);
+// ── DELETE ────────────────────────────────────────────────────────────────────
+async function deleteTrade(i, e) {
+  e.stopPropagation();
+  try { await fetch(VPS_URL+'/trades/'+i, {method:'DELETE'}); } catch {}
+  const trades = getTrades();
+  trades.splice(i,1);
   saveTrades(trades);
   render();
 }
 
-// ── VPS SYNC ─────────────────────────────────────────────────────────────────
+// ── VPS SYNC ──────────────────────────────────────────────────────────────────
 async function syncFromVPS() {
   try {
-    const res  = await fetch(VPS_URL + '/trades');
+    const res  = await fetch(VPS_URL+'/trades');
     if (!res.ok) return;
     const data = await res.json();
-    if (!Array.isArray(data) || data.length === 0) return;
-
-    const local  = getTrades();
-    const tsSet  = new Set(local.map(t => t.ts));
+    if (!Array.isArray(data)||data.length===0) return;
+    const local = getTrades();
+    const tsSet = new Set(local.map(t=>t.ts));
     let added = 0;
-
     data.forEach(t => {
       if (!tsSet.has(t.ts)) {
-        const rr  = calcRR(t.entry, t.sl, t.tp);
-        const pnl = calcPnl(t.result, rr, t.risk);
+        const rr  = t.rr || calcRR(t.entry, t.sl, t.tp);
+        const pnl = (t.pnl !== null && t.pnl !== undefined) ? t.pnl : calcPnl(t.result, rr, t.risk);
         local.push({ ...t, rr, pnl });
         added++;
       }
     });
-
-    if (added > 0) { saveTrades(local); render(); }
+    if (added>0) { saveTrades(local); render(); }
   } catch {}
 }
 
-// ── INIT ─────────────────────────────────────────────────────────────────────
-render();
-syncFromVPS();
-setInterval(syncFromVPS, 30000);
-
-// ── UPTIME COUNTER ────────────────────────────────────────────────────────────
-const START_DATE = new Date('2026-06-07T00:00:00-04:00'); // May 31 2026 EST
-
-function updateUptime() {
-  const now   = new Date();
-  const diff  = now - START_DATE;
-  const days  = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const mins  = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  document.getElementById('uptime-counter').textContent = `${days}D ${hours}H ${mins}M`;
-}
-updateUptime();
-setInterval(updateUptime, 60000);
-
-
-
-function openLightbox(src) {
-  if (!src) return;
-  document.getElementById('lightbox-img').src = src;
-  document.getElementById('lightbox').classList.add('active');
-}
-function closeLightbox() {
-  document.getElementById('lightbox').classList.remove('active');
-}
-
-function formatDuration(ms) {
-  const mins = Math.floor(ms / 60000);
-  const hrs  = Math.floor(mins / 60);
-  const rem  = mins % 60;
-  if (hrs > 0) return hrs + 'h ' + rem + 'm';
-  return mins + 'm';
-}
-
+// ── POPUP ─────────────────────────────────────────────────────────────────────
 function openPopupByIndex(i) {
   let trades = getTrades();
-  const allTrades = trades;
-  if (currentResultFilter) trades = trades.filter(t => t.result === currentResultFilter);
+  if (currentResultFilter) trades = trades.filter(t=>t.result===currentResultFilter);
+  if (currentBiasFilter)   trades = trades.filter(t=>(t.direction||t.type||'').toUpperCase().includes(currentBiasFilter));
   const t = trades[i];
   if (!t) return;
   openPopup(t);
 }
-
 function openPopup(t) {
-  const vpsBase = VPS_URL;
-  document.getElementById('popup-title').textContent = `${t.symbol || 'XAUUSD'} // ${t.result || 'OPEN'} // ${t.date || '—'}`;
-  const entryTime = t.ts ? new Date(t.ts).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false}) : '—';
-  const exitTime  = t.tsClose ? new Date(t.tsClose).toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', hour12:false}) : '—';
-  document.getElementById('popup-meta').innerHTML = `${t.session || '—'} SESSION &nbsp;·&nbsp; <span style="color:#00ff41">ENTRY ${entryTime}</span> &nbsp;·&nbsp; <span style="color:var(--red)">EXIT ${exitTime}</span>`;
-
+  document.getElementById('popup-title').textContent = `MNQ1! // ${t.result||'OPEN'} // ${t.date||'—'}`;
+  const entryTime = t.ts      ? new Date(t.ts).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false}) : '—';
+  const exitTime  = t.tsClose ? new Date(t.tsClose).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',hour12:false}) : '—';
+  document.getElementById('popup-meta').innerHTML = `<span style="color:var(--text-dim)">${(t.type||t.setup||'—')}</span> &nbsp;·&nbsp; <span style="color:var(--green)">ENTRY ${entryTime}</span> &nbsp;·&nbsp; <span style="color:var(--red)">EXIT ${exitTime}</span>`;
   const imgOpen  = document.getElementById('popup-img-open');
   const imgClose = document.getElementById('popup-img-close');
-
-  // Reset error states
-  imgOpen.style.display  = 'block';
-  imgClose.style.display = 'block';
   const onNS = imgOpen.parentElement.querySelector('.screen-none');
   const clNS = imgClose.parentElement.querySelector('.screen-none');
-  if (onNS) onNS.style.display = 'none';
-  if (clNS) clNS.style.display = 'none';
-
-  imgOpen.src  = t.imgOpen  ? vpsBase + t.imgOpen  : '';
-  imgOpen.onclick  = t.imgOpen  ? () => openLightbox(vpsBase + t.imgOpen)  : null;
-  imgClose.src = t.imgClose ? vpsBase + t.imgClose : '';
-  imgClose.onclick = t.imgClose ? () => openLightbox(vpsBase + t.imgClose) : null;
-  if (!t.imgOpen)  { imgOpen.style.display  = 'none'; if (onNS) onNS.style.display  = 'flex'; }
-  if (!t.imgClose) { imgClose.style.display = 'none'; if (clNS) clNS.style.display = 'flex'; }
-
+  imgOpen.src  = t.imgOpen  ? VPS_URL+t.imgOpen  : '';
+  imgClose.src = t.imgClose ? VPS_URL+t.imgClose : '';
+  imgOpen.onclick  = t.imgOpen  ? ()=>openLightbox(VPS_URL+t.imgOpen)  : null;
+  imgClose.onclick = t.imgClose ? ()=>openLightbox(VPS_URL+t.imgClose) : null;
+  imgOpen.style.display  = t.imgOpen  ? 'block' : 'none';
+  imgClose.style.display = t.imgClose ? 'block' : 'none';
+  if (onNS) onNS.style.display = t.imgOpen  ? 'none' : 'flex';
+  if (clNS) clNS.style.display = t.imgClose ? 'none' : 'flex';
+  document.getElementById('ps-setup').textContent = t.type || t.setup || '—';
   document.getElementById('ps-entry').textContent = t.entry || '—';
   document.getElementById('ps-sl').textContent    = t.sl    || '—';
   document.getElementById('ps-tp').textContent    = t.tp    || '—';
   document.getElementById('ps-exit').textContent  = t.exit  || '—';
-  document.getElementById('ps-rr').textContent    = t.rr ? t.rr + ':1' : '—';
-
+  document.getElementById('ps-rr').textContent    = t.rr ? t.rr+':1' : '—';
   const pnlEl = document.getElementById('ps-pnl');
-  if (t.pnl !== null && t.pnl !== undefined) {
-    pnlEl.textContent = (t.pnl >= 0 ? '+' : '') + '$' + t.pnl;
-    pnlEl.className   = t.pnl >= 0 ? '' : 'red';
-  } else { pnlEl.textContent = '—'; }
-  const durEl = document.getElementById('ps-dur');
-  durEl.textContent = t.ts && t.tsClose ? formatDuration(t.tsClose - t.ts) : '—';
-  durEl.style.color = t.pnl !== null && t.pnl !== undefined ? (t.pnl >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--text-dim)';
-
+  if (t.pnl!==null && t.pnl!==undefined) { pnlEl.textContent=(t.pnl>=0?'+':'')+'$'+t.pnl; pnlEl.className=t.pnl>=0?'':'red'; }
+  else { pnlEl.textContent='—'; }
+  document.getElementById('ps-dur').textContent = t.ts&&t.tsClose ? formatDuration(t.tsClose-t.ts) : '—';
   document.getElementById('popup').classList.add('active');
 }
-
 function closePopup(e) {
-  if (e.target === document.getElementById('popup')) {
-    document.getElementById('popup').classList.remove('active');
-  }
+  if (e.target===document.getElementById('popup')) document.getElementById('popup').classList.remove('active');
 }
 
+// ── SETTINGS ─────────────────────────────────────────────────────────────────
+let autotradingOn = false;
+function openSettings() {
+  document.getElementById('lune-webhook').value = localStorage.getItem('ala_mnq_lune_webhook') || '';
+  document.getElementById('settings-status').textContent = '';
+  const sw = document.getElementById('autotrading-sw');
+  autotradingOn = localStorage.getItem('ala_mnq_autotrading') === 'true';
+  sw.className = 'toggle-switch' + (autotradingOn ? ' on' : '');
+  document.getElementById('at-status').textContent = autotradingOn ? 'ENABLED' : 'DISABLED';
+  document.getElementById('at-status').className = 'autotrading-status ' + (autotradingOn ? 'on' : 'off');
+  document.getElementById('settings-overlay').classList.add('active');
+}
+function closeSettings() { document.getElementById('settings-overlay').classList.remove('active'); }
+function toggleAutotrading() {
+  autotradingOn = !autotradingOn;
+  const sw = document.getElementById('autotrading-sw');
+  sw.className = 'toggle-switch' + (autotradingOn ? ' on' : '');
+  document.getElementById('at-status').textContent = autotradingOn ? 'ENABLED' : 'DISABLED';
+  document.getElementById('at-status').className = 'autotrading-status ' + (autotradingOn ? 'on' : 'off');
+  localStorage.setItem('ala_mnq_autotrading', autotradingOn);
+}
+function updateAutotradingPill() {
+  const on = localStorage.getItem('ala_mnq_autotrading') === 'true';
+  const pill = document.getElementById('autotrading-pill');
+  pill.textContent = on ? 'AUTOTRADING ON' : 'AUTOTRADING OFF';
+  pill.style.color = on ? 'var(--green)' : 'var(--text-muted)';
+  pill.style.borderColor = on ? 'var(--green-dim)' : 'var(--border)';
+  pill.style.background = on ? 'var(--green-dark)' : 'transparent';
+}
+function saveSettings() {
+  localStorage.setItem('ala_mnq_lune_webhook', document.getElementById('lune-webhook').value.trim());
+  localStorage.setItem('ala_mnq_autotrading', autotradingOn);
+  document.getElementById('settings-status').textContent = '✓ SAVED';
+  document.getElementById('settings-status').style.color = 'var(--green)';
+  setTimeout(() => { document.getElementById('settings-status').textContent = ''; }, 2000);
+  updateAutotradingPill();
+}
+function clearSettings() {
+  localStorage.removeItem('ala_mnq_lune_webhook');
+  localStorage.removeItem('ala_mnq_autotrading');
+  document.getElementById('lune-webhook').value = '';
+  autotradingOn = false;
+  document.getElementById('autotrading-sw').className = 'toggle-switch';
+  document.getElementById('at-status').textContent = 'DISABLED';
+  document.getElementById('at-status').className = 'autotrading-status off';
+  document.getElementById('settings-status').textContent = 'CLEARED';
+  document.getElementById('settings-status').style.color = 'var(--red)';
+  setTimeout(() => { document.getElementById('settings-status').textContent = ''; }, 2000);
+  updateAutotradingPill();
+}
+
+// ── UPTIME ────────────────────────────────────────────────────────────────────
+const START_DATE = new Date('2026-07-15T00:00:00-04:00');
+function updateUptime() {
+  const diff = new Date() - START_DATE;
+  const days = Math.floor(diff/(1000*60*60*24));
+  const hrs  = Math.floor((diff%(1000*60*60*24))/(1000*60*60));
+  const mins = Math.floor((diff%(1000*60*60))/(1000*60));
+  document.getElementById('uptime-counter').textContent = `${days}D ${hrs}H ${mins}M`;
+}
+updateUptime();
+setInterval(updateUptime, 60000);
+
+// ── LIGHTBOX ──────────────────────────────────────────────────────────────────
+function openLightbox(src) { if(!src)return; document.getElementById('lightbox-img').src=src; document.getElementById('lightbox').classList.add('active'); }
+function closeLightbox()   { document.getElementById('lightbox').classList.remove('active'); }
+
+function formatDuration(ms) {
+  const mins = Math.floor(ms/60000);
+  const hrs  = Math.floor(mins/60);
+  return hrs>0 ? hrs+'h '+(mins%60)+'m' : mins+'m';
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+render();
+syncFromVPS();
+setInterval(syncFromVPS, 30000);
 </script>
 
 <!-- TRADE POPUP -->
@@ -1129,36 +683,65 @@ function closePopup(e) {
   <div class="popup-box">
     <button class="popup-close" onclick="document.getElementById('popup').classList.remove('active')">✕</button>
     <div class="popup-title" id="popup-title">—</div>
-    <div class="popup-meta" id="popup-meta">—</div>
+    <div class="popup-meta"  id="popup-meta">—</div>
     <div class="popup-screens">
       <div class="screen-box">
         <div class="screen-label">BEFORE // ENTRY</div>
-        <img id="popup-img-open" src="" alt="" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+        <img id="popup-img-open" src="" alt="">
         <div class="screen-none" style="display:none">NO SCREENSHOT</div>
       </div>
       <div class="screen-box">
         <div class="screen-label">AFTER // EXIT</div>
-        <img id="popup-img-close" src="" alt="" onerror="this.style.display='none';this.nextSibling.style.display='flex'">
+        <img id="popup-img-close" src="" alt="">
         <div class="screen-none" style="display:none">NO SCREENSHOT</div>
       </div>
     </div>
     <div class="popup-stats">
-      <div class="popup-stat">ENTRY <span id="ps-entry">—</span></div>
-      <div class="popup-stat">STOP <span class="red" id="ps-sl">—</span></div>
-      <div class="popup-stat">TARGET <span id="ps-tp">—</span></div>
-      <div class="popup-stat">EXIT <span id="ps-exit">—</span></div>
-      <div class="popup-stat">R:R <span class="amber" id="ps-rr">—</span></div>
-      <div class="popup-stat">PNL <span id="ps-pnl">—</span></div>
-      <div class="popup-stat">DURATION <span id="ps-dur">—</span></div>
+      <div class="popup-stat">SETUP    <span style="color:var(--text)" id="ps-setup">—</span></div>
+      <div class="popup-stat">ENTRY    <span style="color:var(--text)" id="ps-entry">—</span></div>
+      <div class="popup-stat">STOP     <span class="red"   id="ps-sl">—</span></div>
+      <div class="popup-stat">TARGET   <span style="color:var(--text)" id="ps-tp">—</span></div>
+      <div class="popup-stat">EXIT     <span style="color:var(--text)" id="ps-exit">—</span></div>
+      <div class="popup-stat">R:R      <span class="amber" id="ps-rr">—</span></div>
+      <div class="popup-stat">PNL      <span id="ps-pnl">—</span></div>
+      <div class="popup-stat">DURATION <span style="color:var(--text)" id="ps-dur">—</span></div>
     </div>
   </div>
 </div>
-
 
 <!-- LIGHTBOX -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">✕</button>
   <img id="lightbox-img" src="" alt="">
 </div>
+
+<!-- SETTINGS POPUP -->
+<div class="settings-overlay" id="settings-overlay" onclick="if(event.target===this)closeSettings()">
+  <div class="settings-box">
+    <button class="settings-close" onclick="closeSettings()">✕</button>
+    <div class="settings-title">ALA MNQ // SETTINGS</div>
+    <div class="settings-sub">AUTOTRADING + WEBHOOK CONFIGURATION</div>
+
+    <div class="autotrading-toggle">
+      <div>
+        <div class="toggle-label">AUTOTRADING</div>
+        <div class="autotrading-status off" id="at-status">DISABLED</div>
+      </div>
+      <div class="toggle-switch" id="autotrading-sw" onclick="toggleAutotrading()"></div>
+    </div>
+
+    <div class="settings-group">
+      <label class="settings-label">LuneFi Webhook URL</label>
+      <input class="settings-input" id="lune-webhook" type="text" placeholder="https://app.lunefi.com/webhooks/...">
+    </div>
+
+    <div class="settings-row">
+      <button class="btn" onclick="saveSettings()">SAVE</button>
+      <button class="btn danger" onclick="clearSettings()">CLEAR</button>
+    </div>
+    <div class="settings-status" id="settings-status"></div>
+  </div>
+</div>
+
 </body>
 </html>
