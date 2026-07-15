@@ -343,7 +343,7 @@
 
   .history-row {
     display: grid;
-    grid-template-columns: 140px 100px 1fr 80px;
+    grid-template-columns: 140px 100px 1fr 80px 60px;
     gap: 14px;
     align-items: center;
     padding: 10px 12px;
@@ -365,6 +365,18 @@
     white-space: nowrap;
   }
   .history-row .hr-flags { font-size: 9px; color: var(--text-dim); letter-spacing: 1px; text-align: right; }
+  .history-row .hr-del {
+    background: var(--red-dark);
+    border: 1px solid var(--red);
+    color: var(--red);
+    font-family: var(--mono);
+    font-size: 9px;
+    padding: 3px 10px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all 0.15s;
+  }
+  .history-row .hr-del:hover { background: var(--red); color: var(--bg); }
 
   .btn {
     background: var(--green-dark);
@@ -696,6 +708,7 @@ function render() {
         <div class="hr-wr ${wrClass(rep.winRate)}">${rep.winRate !== undefined ? rep.winRate.toFixed(1) + '%' : '—'}</div>
         <div class="hr-summary">${(rep.summary || '').slice(0, 90)}</div>
         <div class="hr-flags">${(rep.flags || []).length} FLAGS</div>
+        <button class="hr-del" onclick="event.stopPropagation(); deleteReport(${rep.ts})">✕</button>
       </div>
     `).join('');
   }
@@ -706,6 +719,29 @@ function render() {
 function selectReport(i) {
   current = reports[i];
   currentIdx = i;
+  render();
+}
+
+async function deleteReport(ts) {
+  if (!confirm('Delete this report? This cannot be undone.')) return;
+  try {
+    const res = await fetch(VPS_URL + '/hermes/reports/' + ts, { method: 'DELETE' });
+    if (!res.ok) {
+      alert('Delete failed — check server logs.');
+      return;
+    }
+  } catch (err) {
+    console.error('Delete report failed:', err);
+    alert('Could not reach the VPS. Check the connection.');
+    return;
+  }
+  reports = reports.filter(r => r.ts !== ts);
+  if (current && current.ts === ts) {
+    current = reports[0] || null;
+    currentIdx = reports.length ? 0 : -1;
+  } else if (current) {
+    currentIdx = reports.findIndex(r => r.ts === current.ts);
+  }
   render();
 }
 

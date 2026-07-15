@@ -759,7 +759,28 @@ Flag severity: "critical" for setups/sessions with WR well below breakeven or cl
 
   const parsed = toolBlock.input;
 
-  const evidence = (parsed.evidence || [])
+  let evidenceSource = parsed.evidence || [];
+
+  // Fallback: if Hermes cited specific trade indices inside its flags (e.g. "[4]", "[9]")
+  // but left the evidence array empty, extract those indices deterministically instead
+  // of relying on the model to have also copied them into evidence.
+  if (evidenceSource.length === 0 && (parsed.flags || []).length > 0) {
+    const cited = new Map(); // tradeIndex -> note
+    for (const f of parsed.flags) {
+      const text = `${f.title || ""} ${f.detail || ""}`;
+      const matches = text.matchAll(/\[(\d+)\]/g);
+      for (const m of matches) {
+        const idx = parseInt(m[1], 10);
+        if (!cited.has(idx)) cited.set(idx, `Referenced in flag: ${f.title || "untitled"}`);
+      }
+    }
+    evidenceSource = Array.from(cited.entries()).map(([tradeIndex, note]) => ({ tradeIndex, note }));
+    if (evidenceSource.length > 0) {
+      console.log(`[HERMES] Evidence array was empty — backfilled ${evidenceSource.length} trades cited in flags`);
+    }
+  }
+
+  const evidence = evidenceSource
     .map(e => {
       const t = closed[e.tradeIndex];
       if (!t) return null;
@@ -818,6 +839,22 @@ app.get("/hermes/analyze", async (req, res) => {
 app.get("/hermes/reports", (req, res) => {
   const reports = readReports().sort((a, b) => b.ts - a.ts);
   res.json(reports);
+});
+
+// DELETE /hermes/reports/:index — remove a single report by index
+// NOTE: index here refers to position in the array as stored on disk (oldest-first,
+// same order readReports() returns before sorting). The frontend sends the ts instead
+// to avoid index-drift from the sort, see route below.
+app.delete("/hermes/reports/:ts", (req, res) => {
+  const ts = parseInt(req.params.ts, 10);
+  const reports = readReports();
+  const idx = reports.findIndex(r => r.ts === ts);
+  if (idx === -1) {
+    return res.status(404).json({ ok: false, error: "Report not found" });
+  }
+  reports.splice(idx, 1);
+  fs.writeFileSync(REPORTS_FILE, JSON.stringify(reports, null, 2));
+  res.json({ ok: true, total: reports.length });
 });
 
 app.listen(PORT, () => console.log(`✅ ALA VPS listening on port ${PORT}`));
