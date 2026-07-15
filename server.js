@@ -616,6 +616,8 @@ const HERMES_TOOL = {
       summary: { type: "string", description: "2-4 paragraph narrative analysis in plain language" },
       flags: {
         type: "array",
+        minItems: 1,
+        description: "REQUIRED — do not leave empty. Extract every distinct pattern, bias, or risk called out in your summary into its own flag object here. If your summary mentions a setup or session performing well below breakeven, that is a critical flag. If it mentions a directional bias or a concerning-but-not-alarming pattern, that is a warning or insight flag.",
         items: {
           type: "object",
           properties: {
@@ -630,7 +632,8 @@ const HERMES_TOOL = {
       },
       evidence: {
         type: "array",
-        description: "Reference specific trades from TRADE DATA that best illustrate the flags above",
+        minItems: 1,
+        description: "REQUIRED — do not leave empty. For every specific trade index you referenced by number in your summary (e.g. trades you called out as [0], [4], [9], etc.), add one entry here with that tradeIndex and a one-sentence note on why it's evidence. Pull directly from the trade indices you already cited in your prose — do not leave this array empty just because the reasoning is in the summary text.",
         items: {
           type: "object",
           properties: {
@@ -703,7 +706,11 @@ ${focusPrompt
 4. What 1-2 specific filters would most improve win rate based on this data?
 5. Run a basic Monte Carlo assessment — at current win rate + RR, what is the probability of hitting a 5% prop firm drawdown limit over the next 20 trades? Mention this in the summary, not as a flag.
 
-Call the hermes_report tool with your findings. Flag severity: "critical" for setups/sessions with WR well below breakeven or clear structural problems, "warning" for concerning-but-not-alarming patterns, "insight" for neutral observations worth noting.`
+Call the hermes_report tool with your findings.
+
+IMPORTANT — do not put your findings only in the summary text. For every distinct pattern you describe in the summary, also add a corresponding entry in the flags array, and for every specific trade you reference by index number (e.g. "[4]", "[9]"), also add a corresponding entry in the evidence array with that tradeIndex. The flags and evidence arrays must not be empty if the summary discusses specific patterns or trades — extract them out into the structured fields as well as writing about them in prose.
+
+Flag severity: "critical" for setups/sessions with WR well below breakeven or clear structural problems, "warning" for concerning-but-not-alarming patterns, "insight" for neutral observations worth noting. Aim for 3-6 flags and 3-6 evidence entries on a typical run.`
 }`
   });
 
