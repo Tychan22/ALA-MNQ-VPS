@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ALA HERMES</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #00070a;
+    --bg2: #000d12;
+    --bg3: #001018;
+    --border: #00293d;
+    --green: #00b4d8;
+    --green-dim: #0096c7;
+    --green-dark: #001a2e;
+    --red: #ff2244;
+    --red-dark: #330010;
+    --amber: #ffaa00;
+    --cyan: #00ffcc;
+    --text: #90e0ef;
+    --text-dim: #00698a;
+    --text-muted: #002a3a;
+    --mono: 'Share Tech Mono', monospace;
+    --sans: 'Rajdhani', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  #matrix {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0.07;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .shell {
+    position: relative;
+    z-index: 1;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo {
+    font-family: var(--sans);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 6px;
+    color: var(--green);
+    text-shadow: 0 0 20px rgba(0,180,216,0.4);
+  }
+
+  .logo span { color: var(--text-dim); }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .nav-link {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    transition: all 0.15s;
+  }
+  .nav-link:hover { color: var(--green); border-color: var(--green-dim); }
+
+  .status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+  }
+
+  .dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--green-dim);
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 40px;
+    background: linear-gradient(180deg, rgba(0,180,216,0.05) 0%, transparent 100%);
+  }
+
+  .card-label {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+  }
+
+  .card-value {
+    font-family: var(--sans);
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1;
+  }
+
+  .card-value.red { color: var(--red); }
+  .card-value.amber { color: var(--amber); }
+  .card-value.cyan { color: var(--cyan); }
+
+  .card-sub {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    letter-spacing: 1px;
+  }
+
+  .panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+
+  .panel-title {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .panel-title span.tag {
+    background: var(--green-dark);
+    color: var(--green);
+    padding: 2px 8px;
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+
+  .narrative-text {
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+    white-space: pre-line;
+  }
+
+  .narrative-meta {
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .flags-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .flag {
+    display: grid;
+    grid-template-columns: 90px 1fr auto;
+    gap: 16px;
+    align-items: center;
+    padding: 12px 14px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--text-dim);
+  }
+
+  .flag.critical { border-left-color: var(--red); }
+  .flag.warning  { border-left-color: var(--amber); }
+  .flag.insight  { border-left-color: var(--cyan); }
+
+  .flag-sev {
+    font-family: var(--sans);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .flag.critical .flag-sev { color: var(--red); }
+  .flag.warning  .flag-sev { color: var(--amber); }
+  .flag.insight  .flag-sev { color: var(--cyan); }
+
+  .flag-body .flag-title {
+    font-family: var(--sans);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+  .flag-body .flag-detail {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .flag-body .flag-setup-tag {
+    display: inline-block;
+    font-size: 8px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    margin-bottom: 4px;
+  }
+
+  .flag-stat {
+    font-family: var(--sans);
+    font-size: 20px;
+    font-weight: 700;
+    text-align: right;
+    white-space: nowrap;
+  }
+  .flag.critical .flag-stat { color: var(--red); }
+  .flag.warning  .flag-stat { color: var(--amber); }
+  .flag.insight  .flag-stat { color: var(--cyan); }
+
+  .breakdown-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  table.bd {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  table.bd thead th {
+    text-align: left;
+    padding: 8px 10px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    font-weight: 400;
+  }
+  table.bd tbody td {
+    padding: 9px 10px;
+    color: var(--text);
+    border-bottom: 1px solid var(--text-muted);
+  }
+  .bd-bar-wrap {
+    width: 100%;
+    height: 5px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    margin-top: 4px;
+  }
+  .bd-bar {
+    height: 100%;
+    background: var(--green);
+  }
+  .bd-bar.low { background: var(--red); }
+  .bd-bar.mid { background: var(--amber); }
+
+  .evidence-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+  }
+  .evidence-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .evidence-card img {
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    display: block;
+  }
+  .evidence-card .ev-meta {
+    padding: 8px 10px;
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: var(--text-dim);
+  }
+  .evidence-card .ev-note {
+    font-size: 10px;
+    color: var(--text);
+    margin-top: 3px;
+    line-height: 1.4;
+  }
+
+  .history-row {
+    display: grid;
+    grid-template-columns: 140px 100px 1fr 80px;
+    gap: 14px;
+    align-items: center;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--text-muted);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .history-row:hover { background: var(--bg3); }
+  .history-row.active { background: var(--bg3); border-left: 2px solid var(--green-dim); }
+  .history-row .hr-date { font-size: 11px; color: var(--text-dim); }
+  .history-row .hr-wr { font-size: 12px; font-family: var(--sans); font-weight: 600; color: var(--green); }
+  .history-row .hr-wr.red { color: var(--red); }
+  .history-row .hr-wr.amber { color: var(--amber); }
+  .history-row .hr-summary {
+    font-size: 11px;
+    color: var(--text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .history-row .hr-flags { font-size: 9px; color: var(--text-dim); letter-spacing: 1px; text-align: right; }
+
+  .btn {
+    background: var(--green-dark);
+    border: 1px solid var(--green-dim);
+    color: var(--green);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 8px 20px;
+    cursor: pointer;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.15s;
+  }
+  .btn:hover { background: var(--green); color: var(--bg); }
+  .btn:disabled { opacity: 0.4; cursor: default; }
+  .btn:disabled:hover { background: var(--green-dark); color: var(--green); }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px;
+    color: var(--text-muted);
+    font-size: 12px;
+    letter-spacing: 2px;
+  }
+  .empty-state .big { font-size: 32px; margin-bottom: 12px; }
+
+  .lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.95);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    cursor: zoom-out;
+  }
+  .lightbox.active { display: flex; }
+  .lightbox img {
+    max-width: 92vw;
+    max-height: 92vh;
+    object-fit: contain;
+    border: 1px solid var(--border);
+    box-shadow: 0 0 40px rgba(0,180,216,0.1);
+  }
+  .lightbox-close {
+    position: absolute;
+    top: 20px; right: 24px;
+    color: var(--text-dim);
+    font-size: 24px;
+    cursor: pointer;
+    font-family: var(--mono);
+    background: none;
+    border: none;
+  }
+  .lightbox-close:hover { color: var(--green); }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+</style>
+</head>
+<body>
+
+<canvas id="matrix"></canvas>
+
+<div class="shell">
+
+  <header>
+    <div class="logo">ALA <span>//</span> HERMES</div>
+    <div class="header-right">
+      <a class="nav-link" href="ala-logs.html">← TRADE LOG</a>
+      <div class="status">
+        <div class="dot"></div>
+        <span id="last-sync">SYNCING...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- STAT CARDS -->
+  <div class="cards">
+    <div class="card">
+      <div class="card-label">Trades Analyzed</div>
+      <div class="card-value" id="stat-trades">—</div>
+      <div class="card-sub" id="stat-trades-sub">last report</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Win Rate</div>
+      <div class="card-value" id="stat-wr">—</div>
+      <div class="card-sub">at time of analysis</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Critical Flags</div>
+      <div class="card-value red" id="stat-critical">—</div>
+      <div class="card-sub">need attention</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Last Run</div>
+      <div class="card-value cyan" id="stat-lastrun" style="font-size:20px">—</div>
+      <div class="card-sub" id="stat-nextrun">next: Saturday auto-run</div>
+    </div>
+  </div>
+
+  <!-- NARRATIVE -->
+  <div class="panel">
+    <div class="panel-title">
+      Hermes Report <span class="tag" id="report-tag">—</span>
+      <button class="btn" id="run-btn" onclick="runAnalysis()">Run Analysis Now</button>
+    </div>
+    <div class="narrative-text" id="narrative-text">Awaiting first analysis.</div>
+    <div class="narrative-meta" id="narrative-meta"></div>
+  </div>
+
+  <!-- FLAGS -->
+  <div class="panel">
+    <div class="panel-title">Pattern Flags <span class="tag" id="flags-count-tag">0</span></div>
+    <div class="flags-grid" id="flags-grid">
+      <div class="empty-state"><div class="big">◈</div>NO FLAGS YET</div>
+    </div>
+  </div>
+
+  <!-- BREAKDOWN -->
+  <div class="panel">
+    <div class="panel-title">Breakdown</div>
+    <div class="breakdown-grid">
+      <div>
+        <div class="panel-title" style="margin-bottom:8px">By Setup</div>
+        <table class="bd">
+          <thead><tr><th>Setup</th><th>Trades</th><th>Win Rate</th></tr></thead>
+          <tbody id="bd-setup-tbody"></tbody>
+        </table>
+      </div>
+      <div>
+        <div class="panel-title" style="margin-bottom:8px">By Session</div>
+        <table class="bd">
+          <thead><tr><th>Session</th><th>Trades</th><th>Win Rate</th></tr></thead>
+          <tbody id="bd-session-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- EVIDENCE -->
+  <div class="panel">
+    <div class="panel-title">Evidence <span class="tag" id="evidence-count-tag">0</span></div>
+    <div class="evidence-grid" id="evidence-grid">
+      <div class="empty-state" style="grid-column:1/-1"><div class="big">◈</div>NO REFERENCED TRADES</div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="panel">
+    <div class="panel-title">Report History <span class="tag" id="history-count-tag">0</span></div>
+    <div id="history-list">
+      <div class="empty-state"><div class="big">◈</div>NO PRIOR REPORTS</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────────────────────────────
+// Wired to server.js: GET /hermes/reports -> [report, ...] (newest first)
+//                      POST /hermes/analyze -> single report object (see server.js)
+// report shape: { ts, tradesAnalyzed, winRate, summary, flags[], bySetup[], bySession[], evidence[] }
+const VPS_URL = 'https://ala-mnq-vps-production.up.railway.app';
+
+// ── MATRIX ───────────────────────────────────────────────────────────────────
+const canvas = document.getElementById('matrix');
+const ctx    = canvas.getContext('2d');
+canvas.width  = window.innerWidth;
+canvas.height = window.innerHeight;
+const cols = Math.floor(canvas.width / 14);
+const drops = Array(cols).fill(1);
+const chars  = 'HERMESALAMNQPATTERNFLAGANALYSIS0123456789$⚡';
+function drawMatrix() {
+  ctx.fillStyle = 'rgba(0,7,10,0.05)';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.fillStyle = '#00b4d8';
+  ctx.font = '12px Share Tech Mono';
+  drops.forEach((y, i) => {
+    const char = chars[Math.floor(Math.random() * chars.length)];
+    ctx.fillText(char, i * 14, y * 14);
+    if (y * 14 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  });
+}
+setInterval(drawMatrix, 50);
+
+// ── STATE ────────────────────────────────────────────────────────────────────
+let reports = [];   // newest first
+let current = null;
+let currentIdx = -1;
+
+function fmtDate(ts) {
+  if (!ts) return '—';
+  return new Date(ts).toLocaleString('en-US', { month:'short', day:'2-digit', hour:'2-digit', minute:'2-digit', hour12:false });
+}
+
+function severityLabel(sev) {
+  return { critical: 'CRIT', warning: 'WARN', insight: 'INFO' }[sev] || (sev || '').toUpperCase();
+}
+
+function wrClass(wr) {
+  if (wr === null || wr === undefined) return '';
+  if (wr < 35) return 'red';
+  if (wr < 50) return 'amber';
+  return '';
+}
+
+function barClass(wr) {
+  if (wr < 35) return 'low';
+  if (wr < 50) return 'mid';
+  return '';
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+function render() {
+  if (!current) {
+    document.getElementById('report-tag').textContent = 'NO DATA';
+    document.getElementById('last-sync').textContent = 'UPDATED ' + new Date().toLocaleTimeString();
+    return;
+  }
+
+  const r = current;
+
+  document.getElementById('stat-trades').textContent = r.tradesAnalyzed ?? '—';
+  document.getElementById('stat-trades-sub').textContent = fmtDate(r.ts);
+
+  const wr = r.winRate;
+  const wrEl = document.getElementById('stat-wr');
+  wrEl.textContent = wr !== undefined && wr !== null ? wr.toFixed(1) + '%' : '—';
+  wrEl.className = 'card-value ' + wrClass(wr);
+
+  const flags = r.flags || [];
+  const critCount = flags.filter(f => f.severity === 'critical').length;
+  document.getElementById('stat-critical').textContent = critCount;
+
+  document.getElementById('stat-lastrun').textContent = fmtDate(reports[0] ? reports[0].ts : r.ts);
+
+  document.getElementById('report-tag').textContent = fmtDate(r.ts);
+  document.getElementById('narrative-text').textContent = r.summary || 'No summary provided in this report.';
+  document.getElementById('narrative-meta').textContent =
+    `${r.tradesAnalyzed ?? '—'} TRADES · ${flags.length} FLAGS · GENERATED ${fmtDate(r.ts)}`;
+
+  // Flags
+  const flagsGrid = document.getElementById('flags-grid');
+  document.getElementById('flags-count-tag').textContent = flags.length;
+  if (flags.length === 0) {
+    flagsGrid.innerHTML = '<div class="empty-state"><div class="big">◈</div>NO FLAGS THIS RUN</div>';
+  } else {
+    const order = { critical: 0, warning: 1, insight: 2 };
+    const sorted = [...flags].sort((a,b) => (order[a.severity] ?? 3) - (order[b.severity] ?? 3));
+    flagsGrid.innerHTML = sorted.map(f => `
+      <div class="flag ${f.severity}">
+        <div class="flag-sev">${severityLabel(f.severity)}</div>
+        <div class="flag-body">
+          ${f.setup ? `<div class="flag-setup-tag">${f.setup}</div>` : ''}
+          <div class="flag-title">${f.title || 'Untitled flag'}</div>
+          <div class="flag-detail">${f.detail || ''}</div>
+        </div>
+        <div class="flag-stat">${f.stat || ''}</div>
+      </div>
+    `).join('');
+  }
+
+  // Breakdown by setup
+  const bySetup = r.bySetup || [];
+  const setupTbody = document.getElementById('bd-setup-tbody');
+  setupTbody.innerHTML = bySetup.length ? bySetup.map(s => `
+    <tr>
+      <td>${s.setup}</td>
+      <td>${s.trades}</td>
+      <td>
+        ${s.winRate.toFixed(1)}%
+        <div class="bd-bar-wrap"><div class="bd-bar ${barClass(s.winRate)}" style="width:${Math.min(s.winRate,100)}%"></div></div>
+      </td>
+    </tr>
+  `).join('') : '<tr><td colspan="3" style="color:var(--text-muted)">no data</td></tr>';
+
+  // Breakdown by session
+  const bySession = r.bySession || [];
+  const sessionTbody = document.getElementById('bd-session-tbody');
+  sessionTbody.innerHTML = bySession.length ? bySession.map(s => `
+    <tr>
+      <td>${s.session}</td>
+      <td>${s.trades}</td>
+      <td>
+        ${s.winRate.toFixed(1)}%
+        <div class="bd-bar-wrap"><div class="bd-bar ${barClass(s.winRate)}" style="width:${Math.min(s.winRate,100)}%"></div></div>
+      </td>
+    </tr>
+  `).join('') : '<tr><td colspan="3" style="color:var(--text-muted)">no data</td></tr>';
+
+  // Evidence
+  const evidence = r.evidence || [];
+  const evGrid = document.getElementById('evidence-grid');
+  document.getElementById('evidence-count-tag').textContent = evidence.length;
+  if (evidence.length === 0) {
+    evGrid.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="big">◈</div>NO REFERENCED TRADES</div>';
+  } else {
+    evGrid.innerHTML = evidence.map(e => {
+      const src = e.imgClose || e.imgOpen;
+      const full = src ? (src.startsWith('http') ? src : VPS_URL + src) : '';
+      return `
+        <div class="evidence-card" ${full ? `onclick="openLightbox('${full}')"` : ''}>
+          ${full ? `<img src="${full}" alt="">` : `<div style="aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:10px;">NO IMAGE</div>`}
+          <div class="ev-meta">${e.setup || '—'} · ${e.result || '—'}
+            ${e.note ? `<div class="ev-note">${e.note}</div>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // History
+  const histList = document.getElementById('history-list');
+  document.getElementById('history-count-tag').textContent = reports.length;
+  if (reports.length === 0) {
+    histList.innerHTML = '<div class="empty-state"><div class="big">◈</div>NO PRIOR REPORTS</div>';
+  } else {
+    histList.innerHTML = reports.map((rep, i) => `
+      <div class="history-row ${i === currentIdx ? 'active' : ''}" onclick="selectReport(${i})">
+        <div class="hr-date">${fmtDate(rep.ts)}</div>
+        <div class="hr-wr ${wrClass(rep.winRate)}">${rep.winRate !== undefined ? rep.winRate.toFixed(1) + '%' : '—'}</div>
+        <div class="hr-summary">${(rep.summary || '').slice(0, 90)}</div>
+        <div class="hr-flags">${(rep.flags || []).length} FLAGS</div>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('last-sync').textContent = 'UPDATED ' + new Date().toLocaleTimeString();
+}
+
+function selectReport(i) {
+  current = reports[i];
+  currentIdx = i;
+  render();
+}
+
+// ── LIGHTBOX ─────────────────────────────────────────────────────────────────
+function openLightbox(src) {
+  if (!src) return;
+  document.getElementById('lightbox-img').src = src;
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+}
+
+// ── SYNC ─────────────────────────────────────────────────────────────────────
+async function syncReports() {
+  try {
+    const res = await fetch(VPS_URL + '/hermes/reports');
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!Array.isArray(data)) return;
+    reports = [...data].sort((a,b) => new Date(b.ts) - new Date(a.ts));
+    if (reports.length && (!current || currentIdx === -1)) {
+      current = reports[0];
+      currentIdx = 0;
+    }
+    render();
+  } catch (err) {
+    console.error('Hermes sync failed:', err);
+  }
+}
+
+async function runAnalysis() {
+  const btn = document.getElementById('run-btn');
+  btn.disabled = true;
+  btn.textContent = 'Analyzing...';
+  try {
+    const res = await fetch(VPS_URL + '/hermes/analyze', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+    const data = await res.json();
+    if (res.ok && data && data.ts) {
+      reports = [data, ...reports];
+      current = data;
+      currentIdx = 0;
+      render();
+    } else {
+      console.error('Run analysis failed:', data);
+      alert(data.error || 'Analysis failed — check server logs.');
+    }
+  } catch (err) {
+    console.error('Run analysis failed:', err);
+    alert('Could not reach the VPS. Check the connection.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Run Analysis Now';
+  }
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────────────
+render();
+syncReports();
+setInterval(syncReports, 60000);
+</script>
+
+</body>
+</html>

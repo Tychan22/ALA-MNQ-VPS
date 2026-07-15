@@ -77,6 +77,23 @@
 
   .logo span { color: var(--text-dim); }
 
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .nav-link {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--text-dim);
+    text-decoration: none;
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    transition: all 0.15s;
+  }
+  .nav-link:hover { color: var(--green); border-color: var(--green-dim); }
+
   .status {
     display: flex;
     align-items: center;
@@ -562,9 +579,12 @@
 
   <header>
     <div class="logo">ALA <span>//</span> MNQ</div>
-    <div class="status">
-      <div class="dot"></div>
-      <span id="last-sync">SYNCING...</span>
+    <div class="header-right">
+      <a class="nav-link" href="ala-hermes.html">HERMES ANALYSIS →</a>
+      <div class="status">
+        <div class="dot"></div>
+        <span id="last-sync">SYNCING...</span>
+      </div>
     </div>
   </header>
 
