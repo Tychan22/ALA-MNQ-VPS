@@ -26,7 +26,18 @@ const WEBHOOK_SECRET     = process.env.WEBHOOK_SECRET;
 // ─── FILE STORAGE ─────────────────────────────────────────────────────────────
 const DATA_DIR     = process.env.DATA_DIR || path.join(__dirname);
 const TRADES_FILE  = path.join(DATA_DIR, "trades.json");
-const SCREENS_DIR  = path.join(DATA_DIR, "screenshots");
+const SCREENS_DIR    = path.join(DATA_DIR, "screenshots");
+const SETTINGS_FILE  = path.join(DATA_DIR, "settings.json");
+
+function readSettings() {
+  try {
+    if (!fs.existsSync(SETTINGS_FILE)) return {};
+    return JSON.parse(fs.readFileSync(SETTINGS_FILE, "utf8"));
+  } catch { return {}; }
+}
+function writeSettings(s) {
+  fs.writeFileSync(SETTINGS_FILE, JSON.stringify(s, null, 2));
+}
 
 if (!fs.existsSync(SCREENS_DIR)) fs.mkdirSync(SCREENS_DIR, { recursive: true });
 
@@ -125,6 +136,21 @@ async function sendTelegramPhoto(caption, buffer) {
     `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendPhoto`,
     form, { headers: form.getHeaders() }
   );
+}
+
+// ─── LUNE FORWARD ─────────────────────────────────────────────────────────────
+async function forwardToLune(payload) {
+  const settings = readSettings();
+  if (!settings.autotrading || !settings.luneWebhook) return;
+  try {
+    await axios.post(settings.luneWebhook, payload, {
+      headers: { "Content-Type": "application/json" },
+      timeout: 5000,
+    });
+    console.log("[LUNE] Forwarded:", payload.action);
+  } catch (err) {
+    console.error("[LUNE] Forward failed:", err.message);
+  }
 }
 
 function fmtPnl(val) {
@@ -434,6 +460,13 @@ async function handleMNQOpen(req, res) {
 
     res.json({ ok: true, action: "open", symbol, direction });
 
+    // Forward to LUNE if autotrading enabled
+    await forwardToLune({
+      strategy_id: readSettings().luneStrategyId || "",
+      action: direction === "SHORT" ? "ShortEntry" : "LongEntry",
+      symbol, type, entry, sl, tp, risk, timestamp,
+    });
+
     const chartBuffer = await getChartBuffer(symbol);
     let imgOpen = null;
     if (chartBuffer) {
@@ -471,6 +504,13 @@ async function handleMNQClose(req, res, isWin) {
 
   try {
     res.json({ ok: true, action: "close", result, symbol });
+
+    // Forward exit to LUNE if autotrading enabled
+    await forwardToLune({
+      strategy_id: readSettings().luneStrategyId || "",
+      action: direction === "SHORT" ? "ShortExit" : "LongExit",
+      symbol, type, exit, timestamp, result,
+    });
 
     const chartBuffer = await getChartBuffer(symbol);
     let imgClose = null;
@@ -855,6 +895,16 @@ app.delete("/hermes/reports/:ts", (req, res) => {
   reports.splice(idx, 1);
   fs.writeFileSync(REPORTS_FILE, JSON.stringify(reports, null, 2));
   res.json({ ok: true, total: reports.length });
+});
+
+// ─── SETTINGS ENDPOINTS ───────────────────────────────────────────────────────
+app.get("/settings", (req, res) => res.json(readSettings()));
+app.post("/settings", (req, res) => {
+  const current = readSettings();
+  const updated = { ...current, ...req.body };
+  writeSettings(updated);
+  console.log("[SETTINGS] Updated:", updated);
+  res.json({ ok: true, settings: updated });
 });
 
 app.listen(PORT, () => console.log(`✅ ALA VPS listening on port ${PORT}`));

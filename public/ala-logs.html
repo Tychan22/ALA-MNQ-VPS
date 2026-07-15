@@ -602,9 +602,18 @@ function closePopup(e) {
 
 // ── SETTINGS ─────────────────────────────────────────────────────────────────
 let autotradingOn = false;
-function openSettings() {
+async function openSettings() {
   document.getElementById('lune-webhook').value = localStorage.getItem('ala_mnq_lune_webhook') || '';
+  document.getElementById('lune-strategy-id').value = localStorage.getItem('ala_mnq_lune_strategy_id') || '';
   document.getElementById('settings-status').textContent = '';
+  // Load from VPS too
+  try {
+    const r = await fetch(VPS_URL + '/settings');
+    const s = await r.json();
+    if (s.luneWebhook)    document.getElementById('lune-webhook').value = s.luneWebhook;
+    if (s.luneStrategyId) document.getElementById('lune-strategy-id').value = s.luneStrategyId;
+    if (s.autotrading !== undefined) autotradingOn = s.autotrading;
+  } catch {}
   const sw = document.getElementById('autotrading-sw');
   autotradingOn = localStorage.getItem('ala_mnq_autotrading') === 'true';
   sw.className = 'toggle-switch' + (autotradingOn ? ' on' : '');
@@ -629,9 +638,20 @@ function updateAutotradingPill() {
   pill.style.borderColor = on ? 'var(--green-dim)' : 'var(--border)';
   pill.style.background = on ? 'var(--green-dark)' : 'transparent';
 }
-function saveSettings() {
-  localStorage.setItem('ala_mnq_lune_webhook', document.getElementById('lune-webhook').value.trim());
+async function saveSettings() {
+  const webhook    = document.getElementById('lune-webhook').value.trim();
+  const strategyId = document.getElementById('lune-strategy-id').value.trim();
+  localStorage.setItem('ala_mnq_lune_webhook', webhook);
   localStorage.setItem('ala_mnq_autotrading', autotradingOn);
+  localStorage.setItem('ala_mnq_lune_strategy_id', strategyId);
+  // Sync to VPS
+  try {
+    await fetch(VPS_URL + '/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ luneWebhook: webhook, luneStrategyId: strategyId, autotrading: autotradingOn })
+    });
+  } catch {}
   document.getElementById('settings-status').textContent = '✓ SAVED';
   document.getElementById('settings-status').style.color = 'var(--green)';
   setTimeout(() => { document.getElementById('settings-status').textContent = ''; }, 2000);
