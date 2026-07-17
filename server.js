@@ -211,6 +211,14 @@ async function handleOpen(req, res) {
     // Respond to TradingView immediately
     res.json({ ok: true, action: "open", symbol });
 
+    // Forward entry to LUNE if autotrading enabled
+    const dir = pending[symbol]?.direction || "LONG";
+    await forwardToLune({
+      strategy_id: readSettings().luneStrategyId || "",
+      action: dir === "SHORT" ? "ShortEntry" : "LongEntry",
+      symbol, entry, sl, tp, risk, timestamp,
+    });
+
     // Then grab screenshot and send Telegram async
     const chartBuffer = await getChartBuffer(symbol);
     let imgOpen = null;
@@ -306,6 +314,13 @@ async function handleClose(req, res, code) {
     const trades = readTrades();
     trades.push(trade);
     writeTrades(trades);
+
+    // Forward exit to LUNE if autotrading enabled
+    await forwardToLune({
+      strategy_id: readSettings().luneStrategyId || "",
+      action: (trade.direction || "LONG") === "SHORT" ? "ShortExit" : "LongExit",
+      symbol, exit: exitPrice, result, timestamp,
+    });
 
     console.log(`[CLOSE] Trade logged. imgOpen: ${imgOpen} imgClose: ${imgClose}`);
   } catch (err) {
