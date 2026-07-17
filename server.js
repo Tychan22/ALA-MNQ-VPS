@@ -145,7 +145,7 @@ async function forwardToLune(payload) {
   try {
     await axios.post(settings.luneWebhook, payload, {
       headers: { "Content-Type": "application/json" },
-      timeout: 5000,
+      timeout: 10000,
     });
     console.log("[LUNE] Forwarded:", payload.action);
   } catch (err) {
@@ -590,10 +590,11 @@ app.post("/signal", async (req, res) => {
   const { action, symbol } = req.body;
   console.log("[/signal] action:", action, "symbol:", symbol, "body:", JSON.stringify(req.body));
 
-  // MNQ uses string actions: "entry", "tp", "sl"
-  if (action === "entry") return handleMNQOpen(req, res);
-  if (action === "tp")    return handleMNQClose(req, res, true);
+  // MNQ uses string actions (legacy: "entry"/"tp"/"sl", new: "LongEntry"/"ShortEntry"/"LongExit"/"ShortExit")
+  if (action === "entry" || action === "LongEntry" || action === "ShortEntry") return handleMNQOpen(req, res);
+  if (action === "tp"    || action === "LongExit"  || action === "ShortExit")  return handleMNQClose(req, res, true);
   if (action === "sl")    return handleMNQClose(req, res, false);
+  if (action === "eod_close") return handleMNQClose(req, res, false);
 
   // Gold/BTC uses numeric action codes
   const code = parseInt(action);
