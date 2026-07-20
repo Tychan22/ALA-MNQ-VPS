@@ -318,8 +318,13 @@ async function handleClose(req, res, code) {
     // Forward exit to LUNE if autotrading enabled
     await forwardToLune({
       strategy_id: readSettings().luneStrategyId || "",
-      action: (trade.direction || "LONG") === "SHORT" ? "ShortExit" : "LongExit",
-      symbol, exit: exitPrice, result, timestamp,
+      strategy_name: readSettings().luneName || "ALA MNQ",
+      strategy_order_action: (trade.direction || "LONG") === "SHORT" ? "buy" : "sell",
+      strategy_prev_market_position: (trade.direction || "LONG") === "SHORT" ? "short" : "long",
+      strategy_market_position: "flat",
+      quantity: 0,
+      bar_close_price: exitPrice,
+      order_fill_price: exitPrice,
     });
 
     console.log(`[CLOSE] Trade logged. imgOpen: ${imgOpen} imgClose: ${imgClose}`);
@@ -476,10 +481,18 @@ async function handleMNQOpen(req, res) {
     res.json({ ok: true, action: "open", symbol, direction });
 
     // Forward to LUNE if autotrading enabled
+    const luneQty = risk && sl && entry
+      ? Math.max(1, Math.floor(parseFloat(risk) / (Math.abs(parseFloat(sl) - parseFloat(entry)) * 2)))
+      : 1;
     await forwardToLune({
       strategy_id: readSettings().luneStrategyId || "",
-      action: direction === "SHORT" ? "ShortEntry" : "LongEntry",
-      symbol, type, entry, sl, tp, risk, timestamp,
+      strategy_name: readSettings().luneName || "ALA MNQ",
+      strategy_order_action: direction === "SHORT" ? "sell" : "buy",
+      strategy_prev_market_position: "flat",
+      strategy_market_position: direction === "SHORT" ? "short" : "long",
+      quantity: luneQty,
+      bar_close_price: entry,
+      order_fill_price: entry,
     });
 
     const chartBuffer = await getChartBuffer(symbol);
@@ -523,15 +536,20 @@ async function handleMNQClose(req, res, isWin) {
     // Forward exit to LUNE if autotrading enabled
     await forwardToLune({
       strategy_id: readSettings().luneStrategyId || "",
-      action: direction === "SHORT" ? "ShortExit" : "LongExit",
-      symbol, type, exit, timestamp, result,
+      strategy_name: readSettings().luneName || "ALA MNQ",
+      strategy_order_action: direction === "SHORT" ? "buy" : "sell",
+      strategy_prev_market_position: direction === "SHORT" ? "short" : "long",
+      strategy_market_position: "flat",
+      quantity: 0,
+      bar_close_price: exit,
+      order_fill_price: exit,
     });
 
-    const chartBuffer = await getChartBuffer(symbol);
+    const chartBuffer2 = await getChartBuffer(symbol);
     let imgClose = null;
-    if (chartBuffer) {
-      imgClose = saveScreenshot(chartBuffer, `close_${symbol}`);
-      await sendTelegramPhoto(msg, chartBuffer);
+    if (chartBuffer2) {
+      imgClose = saveScreenshot(chartBuffer2, `close_${symbol}`);
+      await sendTelegramPhoto(msg, chartBuffer2);
     } else {
       await sendTelegram(msg);
     }
