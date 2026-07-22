@@ -153,6 +153,25 @@
   .autotrading-status.off { color:var(--text-muted); }
 
   ::-webkit-scrollbar { width:4px; }
+
+  /* PASSWORD LOCK */
+  .pw-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:300; align-items:center; justify-content:center; }
+  .pw-overlay.active { display:flex; }
+  .pw-box { background:var(--bg2); border:1px solid var(--border); border-top:2px solid var(--green-dim); padding:32px; width:360px; text-align:center; position:relative; transition:transform 0.1s; }
+  .pw-box.shake { animation:shake 0.4s ease; }
+  .pw-box.success { animation:glow-success 0.5s ease; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)} 40%{transform:translateX(8px)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
+  @keyframes glow-success { 0%{box-shadow:0 0 0 rgba(0,204,255,0)} 50%{box-shadow:0 0 40px rgba(0,204,255,0.4)} 100%{box-shadow:0 0 0 rgba(0,204,255,0)} }
+  .pw-title { font-family:var(--sans); font-size:14px; font-weight:600; color:var(--green); letter-spacing:3px; margin-bottom:6px; }
+  .pw-sub { font-size:9px; color:var(--text-dim); letter-spacing:2px; margin-bottom:20px; }
+  .pw-input { width:100%; background:var(--bg); border:1px solid var(--border); color:var(--green); font-family:var(--mono); font-size:14px; padding:10px 14px; outline:none; text-align:center; letter-spacing:4px; transition:border-color 0.2s; }
+  .pw-input:focus { border-color:var(--green-dim); }
+  .pw-input.error { border-color:var(--red); color:var(--red); }
+  .pw-input.ok { border-color:var(--green); }
+  .pw-status { font-size:10px; letter-spacing:2px; margin-top:10px; min-height:16px; }
+  .pw-status.ok  { color:var(--green); }
+  .pw-status.err { color:var(--red); }
+  .pw-hint { font-size:9px; color:var(--text-muted); letter-spacing:1px; margin-top:14px; }
   ::-webkit-scrollbar-track { background:var(--bg); }
   ::-webkit-scrollbar-thumb { background:var(--border); }
 </style>
@@ -170,8 +189,8 @@
         <div class="dot"></div>
         <span id="last-sync">SYNCING...</span>
       </div>
-      <a href="/ala-hermes.html" style="text-decoration:none"><button class="btn" style="padding:5px 14px;font-size:10px">⚡ HERMES</button></a>
-      <button class="btn" onclick="openSettingsWrapper()" style="padding:5px 14px;font-size:10px">⚙ SETTINGS</button>
+      <button class="btn" onclick="requireAdmin(()=>window.location.href='/ala-hermes.html')" style="padding:5px 14px;font-size:10px">⚡ HERMES</button>
+      <button class="btn" onclick="requireAdmin(openSettingsWrapper)" style="padding:5px 14px;font-size:10px">⚙ SETTINGS</button>
     </div>
   </header>
 
@@ -237,7 +256,7 @@
       <div class="panel-title">Calendar <span id="cal-month">—</span></div>
       <div class="cal-grid" id="cal-labels"></div>
       <div class="cal-grid" id="cal-grid"></div>
-      <div ondblclick="openSettingsWrapper()" style="cursor:pointer;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-top:1px solid var(--border);margin-top:14px;padding-top:12px;text-align:center;font-size:9px;letter-spacing:2px;color:var(--text-dim);">
+      <div ondblclick="requireAdmin(openSettingsWrapper)" style="cursor:pointer;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-top:1px solid var(--border);margin-top:14px;padding-top:12px;text-align:center;font-size:9px;letter-spacing:2px;color:var(--text-dim);">
         PHASE 2 UPTIME<br>
         <span id="uptime-counter" style="color:var(--green);font-family:Rajdhani,sans-serif;font-size:18px;font-weight:700;margin-top:4px;display:block;">—</span>
         <span id="phase2-date" style="font-size:8px;color:var(--text-muted);letter-spacing:2px;margin-top:4px;display:block;">SINCE JUL 15 2026</span>
@@ -483,7 +502,7 @@ function render() {
         <td style="color:var(--amber)">${rrDisplay}</td>
         <td><span class="badge ${badgeCls}">${t.orphan?'GHOST':result}</span></td>
         <td class="${pnlClass}">${pnlStr}</td>
-        <td><button class="btn danger" style="padding:3px 10px;font-size:9px" onclick="deleteTrade(${i},event)">✕</button></td>
+        <td><button class="btn danger" style="padding:3px 10px;font-size:9px" onclick="requireAdmin(()=>deleteTrade(${i},event))">✕</button></td>
       </tr>`;
     }).join('');
   }
@@ -698,6 +717,59 @@ function formatDuration(ms) {
   return hrs>0 ? hrs+'h '+(mins%60)+'m' : mins+'m';
 }
 
+// ── PASSWORD LOCK ────────────────────────────────────────────────────────────
+const ADMIN_PW = 'conflux2026';
+let adminUnlocked = false;
+let pwCallback = null;
+
+function requireAdmin(callback) {
+  if (adminUnlocked) { callback(); return; }
+  pwCallback = callback;
+  const overlay = document.getElementById('pw-overlay');
+  const input   = document.getElementById('pw-input');
+  const status  = document.getElementById('pw-status');
+  input.value = '';
+  input.className = 'pw-input';
+  status.textContent = '';
+  status.className = 'pw-status';
+  overlay.classList.add('active');
+  setTimeout(() => input.focus(), 100);
+}
+
+function checkPassword() {
+  const input  = document.getElementById('pw-input');
+  const box    = document.getElementById('pw-box');
+  const status = document.getElementById('pw-status');
+  if (input.value === ADMIN_PW) {
+    adminUnlocked = true;
+    input.className = 'pw-input ok';
+    status.textContent = '✓ ACCESS GRANTED';
+    status.className = 'pw-status ok';
+    box.classList.add('success');
+    setTimeout(() => {
+      document.getElementById('pw-overlay').classList.remove('active');
+      box.classList.remove('success');
+      if (pwCallback) { pwCallback(); pwCallback = null; }
+    }, 600);
+  } else {
+    input.value = '';
+    input.className = 'pw-input error';
+    status.textContent = '✕ INCORRECT PASSWORD';
+    status.className = 'pw-status err';
+    box.classList.add('shake');
+    setTimeout(() => {
+      box.classList.remove('shake');
+      input.className = 'pw-input';
+      status.textContent = '';
+      input.focus();
+    }, 500);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.getElementById('pw-overlay').classList.remove('active');
+});
+
 // ── INIT ──────────────────────────────────────────────────────────────────────
 render();
 syncFromVPS();
@@ -773,5 +845,15 @@ setInterval(syncFromVPS, 30000);
   </div>
 </div>
 
+<!-- PASSWORD OVERLAY -->
+<div class="pw-overlay" id="pw-overlay">
+  <div class="pw-box" id="pw-box">
+    <div class="pw-title">ADMIN ACCESS</div>
+    <div class="pw-sub">ENTER PASSWORD TO CONTINUE</div>
+    <input class="pw-input" id="pw-input" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')checkPassword()">
+    <div class="pw-status" id="pw-status"></div>
+    <div class="pw-hint">ESC to cancel</div>
+  </div>
+</div>
 </body>
 </html>
