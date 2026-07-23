@@ -774,6 +774,19 @@ document.addEventListener('keydown', e => {
 render();
 syncFromVPS();
 setInterval(syncFromVPS, 30000);
+
+// Load autotrading state from VPS on page load (cross-browser sync)
+fetch(VPS_URL + '/settings').then(r => r.json()).then(s => {
+  if (s.autotrading !== undefined) {
+    autotradingOn = s.autotrading;
+    localStorage.setItem('ala_mnq_autotrading', autotradingOn);
+    updateAutotradingPill();
+  }
+}).catch(() => {
+  // Fallback to localStorage if VPS unreachable
+  autotradingOn = localStorage.getItem('ala_mnq_autotrading') === 'true';
+  updateAutotradingPill();
+});
 </script>
 
 <!-- TRADE POPUP -->
